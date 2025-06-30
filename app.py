@@ -2,12 +2,14 @@ from flask import Flask, render_template, request
 
 app = Flask(__name__)
 
-# Sample static bus schedule data
+#Sample static bus schedule data
 bus_schedule = [
     {"source": "Birmingham", "destination": "Manchester", "departure": "10:00", "arrival": "13:00"},
     {"source": "London", "destination": "Leeds", "departure": "12:00", "arrival": "16:00"},
     {"source": "Birmingham", "destination": "Leeds", "departure": "08:00", "arrival": "11:30"},
-    {"source": "Manchester", "destination": "London", "departure": "09:00", "arrival": "13:00"}
+    {"source": "Manchester", "destination": "London", "departure": "09:00", "arrival": "13:00"},
+    {"source": "Manchester", "destination": "Leeds", "departure": "07:00", "arrival": "10:00"}
+
 ]
 
 
