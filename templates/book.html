@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}UK BusApp - Book{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow-lg border-0 rounded-4 p-4 mt-4">
+            <h2 class="mb-4 text-center">Book Your Bus</h2>
+            <form action="{{ url_for('book') }}" method="post">
+                <div class="mb-2">
+                    <b>Bus:</b> {{ bus }}
+                    <input type="hidden" name="bus" value="{{ bus }}">
+                </div>
+                <div class="mb-2">
+                    <b>From:</b> {{ source }}
+                    <input type="hidden" name="source" value="{{ source }}">
+                </div>
+                <div class="mb-2">
+                    <b>To:</b> {{ destination }}
+                    <input type="hidden" name="destination" value="{{ destination }}">
+                </div>
+                <div class="mb-2">
+                    <b>Date:</b> {{ date }}
+                    <input type="hidden" name="date" value="{{ date }}">
+                </div>
+                <div class="mb-3">
+                    <b>Time:</b> {{ time }}
+                    <input type="hidden" name="time" value="{{ time }}">
+                </div>
+                <div class="mb-3">
+                    <label for="name" class="form-label">Passenger Name</label>
+                    <input type="text" class="form-control" name="name" required>
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">Passenger Email</label>
+                    <input type="email" class="form-control" name="email" required>
+                </div>
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary btn-lg rounded-pill">Confirm Booking</button>
+                    <a href="/" class="btn btn-secondary rounded-pill">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

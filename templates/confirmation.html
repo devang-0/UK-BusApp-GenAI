@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}UK BusApp - Confirmation{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow-lg border-0 rounded-4 p-4 mt-5 text-center">
+            <h2 class="mb-4">Booking Confirmed!</h2>
+            <div class="alert alert-success">
+                Thank you, <b>{{ name }}</b>!<br>
+                Your seat on <b>{{ bus }}</b> from <b>{{ source }}</b> to <b>{{ destination }}</b> on <b>{{ date }}</b> at <b>{{ time }}</b> is confirmed.
+            </div>
+            <a href="/" class="btn btn-primary rounded-pill mt-3">Book Another Ticket</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
