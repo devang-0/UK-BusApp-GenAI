@@ -28,11 +28,11 @@
                 </div>
                 <div class="mb-3">
                     <label for="name" class="form-label">Passenger Name</label>
-                    <input type="text" class="form-control" name="name" required>
+                    <input type="text" class="form-control" name="name" value="{{ passenger_name if passenger_name }}" required>
                 </div>
                 <div class="mb-3">
                     <label for="email" class="form-label">Passenger Email</label>
-                    <input type="email" class="form-control" name="email" required>
+                    <input type="email" class="form-control" name="email" value="{{ passenger_email if passenger_email }}" required>
                 </div>
                 <div class="d-grid gap-2">
                     <button type="submit" class="btn btn-primary btn-lg rounded-pill">Confirm Booking</button>

@@ -44,11 +44,36 @@
             <li class="nav-item">
               <a class="nav-link" href="{{ url_for('book') }}">Book</a>
             </li>
+            {% if current_user.is_authenticated %} {# Check if user is logged in using Flask-Login's current_user #}
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('my_bookings') }}">My Bookings</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('logout') }}">Logout ({{ current_user.username }})</a> {# Display username from current_user #}
+            </li>
+            {% else %}
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('register') }}">Register</a>
+            </li>
+            {% endif %}
           </ul>
         </div>
       </div>
     </nav>
     <div class="container mb-5">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
         {% block content %}{% endblock %}
     </div>
 

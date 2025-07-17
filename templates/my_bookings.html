@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}UK BusApp - My Bookings{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card shadow-lg border-0 rounded-4 p-4 mt-4">
+            <h2 class="mb-4 text-center">My Bookings</h2>
+            {% if bookings %}
+                <div class="table-responsive">
+                    <table class="table table-striped align-middle">
+                        <thead class="table-primary">
+                            <tr>
+                                <th>Bus</th>
+                                <th>From</th>
+                                <th>To</th>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Passenger Name</th>
+                                <th>Passenger Email</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for booking in bookings %}
+                            <tr>
+                                <td>{{ booking.bus }}</td>
+                                <td>{{ booking.source }}</td>
+                                <td>{{ booking.destination }}</td>
+                                <td>{{ booking.date }}</td>
+                                <td>{{ booking.time }}</td>
+                                <td>{{ booking.passenger_name }}</td>
+                                <td>{{ booking.passenger_email }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info text-center">You have no bookings yet.</div>
+            {% endif %}
+            <div class="text-center mt-3">
+                <a href="/" class="btn btn-primary rounded-pill">Book a New Ticket</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
