@@ -1,19 +1,21 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 import csv
 import os
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
+import google.generativeai as genai
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'notsecrettt'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'  # SQLite database
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
-login_manager.login_view = 'login'  # The view function name for the login page
+login_manager.login_view = 'login'
+genai.configure(api_key=os.environ.get("GOOGLE_API_KEY"))
+model = genai.GenerativeModel('gemini-1.5-flash')
 
 
-# User model for database
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(20), unique=True, nullable=False)
@@ -31,7 +33,6 @@ class User(UserMixin, db.Model):
         return f"User('{self.username}', '{self.email}')"
 
 
-#  Booking model for database
 class Booking(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)  # Link to User
@@ -47,7 +48,6 @@ class Booking(db.Model):
         return f"Booking('{self.bus}', '{self.source}' to '{self.destination}', on '{self.date}')"
 
 
-# Flask-Login user loader
 @login_manager.user_loader
 def load_user(user_id):
     return db.session.get(User, int(user_id))
@@ -70,6 +70,28 @@ def home():
     return render_template('home.html', stations=stations)
 
 
+@app.route('/chatbot_api', methods=['POST'])
+@login_required
+def chatbot_api():
+
+    user_message = request.json.get('message')
+
+    if not user_message:
+        return jsonify({"response": "No message provided."}), 400
+
+    try:
+        chat_session = model.start_chat(history=[])
+        response = chat_session.send_message(user_message)
+        return jsonify({"response": response.text})
+    except Exception as e:
+        print(f"Error calling Gemini API: {e}")
+        return jsonify({"response": "Sorry, I'm having trouble connecting to the AI. Please try again later."}), 500
+
+@app.route('/chatbot')
+@login_required
+def chatbot_page():
+    return render_template('chatbot.html')
+
 @app.route('/schedule')
 def schedule():
     schedules = load_schedules()
@@ -89,7 +111,6 @@ def schedule():
                            date=date)
 
 
-# Handle direct /book route gracefully
 @app.route('/book', methods=['GET', 'POST'])
 @login_required
 def book():
@@ -105,7 +126,7 @@ def book():
             return render_template('book_direct.html')
 
 
-        passenger_name = current_user.username if current_user.is_authenticated else ''  # Using username for name
+        passenger_name = current_user.username if current_user.is_authenticated else ''
         passenger_email = current_user.email if current_user.is_authenticated else ''
 
         return render_template('book.html',
@@ -155,7 +176,6 @@ def confirmation():
                            time=time)
 
 
-# New Registration Route
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
@@ -184,7 +204,6 @@ def register():
     return render_template('register.html')
 
 
-# New Login Route - Uses email for login
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
@@ -204,7 +223,6 @@ def login():
     return render_template('login.html')
 
 
-# New Logout Route
 @app.route('/logout')
 @login_required
 def logout():
@@ -213,7 +231,6 @@ def logout():
     return redirect(url_for('home'))
 
 
-# NEW: My Bookings Route
 @app.route('/my_bookings')
 @login_required
 def my_bookings():
