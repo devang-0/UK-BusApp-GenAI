@@ -43,6 +43,7 @@ class Booking(db.Model):
     time = db.Column(db.String(20), nullable=False)
     passenger_name = db.Column(db.String(100), nullable=False)
     passenger_email = db.Column(db.String(120), nullable=False)
+    num_passengers = db.Column(db.Integer, nullable=False, default=1)
 
     def __repr__(self):
         return f"Booking('{self.bus}', '{self.source}' to '{self.destination}', on '{self.date}')"
@@ -120,7 +121,7 @@ def book():
         destination = request.args.get('destination')
         date = request.args.get('date')
         time = request.args.get('time')
-        # If no params, show info message
+
         if not (bus and source and destination and date and time):
             flash('Please select a bus from the schedule to book your seat.', 'info')
             return render_template('book_direct.html')
@@ -136,7 +137,8 @@ def book():
                                date=date,
                                time=time,
                                passenger_name=passenger_name,
-                               passenger_email=passenger_email)
+                               passenger_email=passenger_email,
+                               num_passengers = 1)
     else:
         name = request.form['name']
         email = request.form['email']
@@ -145,6 +147,7 @@ def book():
         destination = request.form['destination']
         date = request.form['date']
         time = request.form['time']
+        num_passengers = request.form.get('num_passengers', 1, type=int)
 
         new_booking = Booking(
             user_id=current_user.id,
@@ -154,13 +157,13 @@ def book():
             date=date,
             time=time,
             passenger_name=name,
-            passenger_email=email
+            passenger_email=email,
+            num_passengers=num_passengers
         )
         db.session.add(new_booking)
         db.session.commit()
 
-        flash(f'Thank you, {name}! Your seat on {bus} from {source} to {destination} on {date} at {time} is confirmed.',
-              'success')
+        flash(f'Thank you, {name}! Your seat on {bus} from {source} to {destination} on {date} at {time} is confirmed for {num_passengers} passenger(s).', 'success')
         return redirect(url_for('my_bookings'))  #
 
 

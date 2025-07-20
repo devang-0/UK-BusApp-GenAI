@@ -34,6 +34,10 @@
                     <label for="email" class="form-label">Passenger Email</label>
                     <input type="email" class="form-control" name="email" value="{{ passenger_email if passenger_email }}" required>
                 </div>
+                <div class="mb-3">
+                    <label for="num_passengers" class="form-label">Number of Tickets</label>
+                    <input type="number" class="form-control" id="num_passengers" name="num_passengers" min="1" max="5" value="{{ num_passengers if num_passengers else 1 }}" required>
+                </div>
                 <div class="d-grid gap-2">
                     <button type="submit" class="btn btn-primary btn-lg rounded-pill">Confirm Booking</button>
                     <a href="/" class="btn btn-secondary rounded-pill">Cancel</a>
