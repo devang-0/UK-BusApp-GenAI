@@ -238,10 +238,24 @@ def logout():
 @app.route('/my_bookings')
 @login_required
 def my_bookings():
-
+    user_id = current_user.id
     bookings = current_user.bookings
     return render_template('my_bookings.html', bookings=bookings)
 
+@app.route('/cancel_booking/<int:booking_id>', methods=['POST'])
+@login_required
+def cancel_booking(booking_id):
+    booking = Booking.query.get_or_404(booking_id)
+
+    if booking.user_id != current_user.id:
+        flash('You are not authorized to cancel this booking.', 'danger')
+        return redirect(url_for('my_bookings'))
+
+    db.session.delete(booking)
+    db.session.commit()
+
+    flash(f'Your booking for {booking.bus} from {booking.source} to {booking.destination} on {booking.date} at {booking.time} has been cancelled.', 'success')
+    return redirect(url_for('my_bookings'))
 
 with app.app_context():
     db.create_all()
