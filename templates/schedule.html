@@ -5,6 +5,37 @@
     <div class="col-lg-10">
         <div class="card shadow-lg border-0 rounded-4 p-4">
             <h2 class="mb-4 text-center">Bus Schedule</h2>
+            <div class="mb-4 p-3 border rounded">
+                <h4 class="mb-3">Refine Your Search</h4>
+                <form action="/schedule" method="get" class="row g-3">
+                    <div class="col-md-4">
+                        <label for="source-filter" class="form-label visually-hidden">From</label>
+                        <select class="form-select" id="source-filter" name="source">
+                            <option value="">Any Source</option>
+                            {% for station in stations %}
+                                <option value="{{ station }}" {% if station == source %}selected{% endif %}>{{ station }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="destination-filter" class="form-label visually-hidden">To</label>
+                        <select class="form-select" id="destination-filter" name="destination">
+                            <option value="">Any Destination</option>
+                            {% for station in stations %}
+                                <option value="{{ station }}" {% if station == destination %}selected{% endif %}>{{ station }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="date-filter" class="form-label visually-hidden">Date</label>
+                        <input type="date" class="form-control" id="date-filter" name="date" value="{{ date if date }}">
+                    </div>
+                    <div class="col-12 text-end">
+                        <button type="submit" class="btn btn-secondary rounded-pill me-2">Apply Filters</button>
+                        <a href="{{ url_for('schedule') }}" class="btn btn-outline-secondary rounded-pill">Clear Filters</a>
+                    </div>
+                </form>
+            </div>
             <p class="text-center">
                 {% if source %} <b>From:</b> {{ source }} {% endif %}
                 {% if destination %} <b>To:</b> {{ destination }} {% endif %}

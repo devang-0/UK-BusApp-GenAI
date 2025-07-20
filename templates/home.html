@@ -36,6 +36,21 @@
                         <button type="submit" class="btn btn-primary btn-lg w-100 rounded-pill">Search Buses</button>
                     </div>
                 </form>
+                <hr class="my-4">
+                <h3 class="mb-3">need help for planning your journey?</h3>
+                <p class="lead">Chat with our AI Assistant for Bus schedules and information!</p>
+                <a href="{{ url_for('chatbot_page') }}" class="btn btn-info btn-lg rounded-pill mb-4">
+                    <i class="fas fa-robot ne-2"></i>talk to Ai Assistant
+                </a>
+
+                {% if current_user.is_authenticated %}
+                <hr class="my-4">
+                <h3 class="mb-3">Welcome back, {{ current_user.username }}!</h3>
+                <p class="lead">Ready to manage your trips</p>
+                <a href="{{ url_for('my_bookings') }}" class="btn btn-success btn-lgn rounded-pill">
+                    <i class="fas fa-ticket-alt me-2"></i>View My Bookings
+                </a>
+                {% endif %}
             </div>
         </div>
     </div>

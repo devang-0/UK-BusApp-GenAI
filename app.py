@@ -99,6 +99,7 @@ def schedule():
     source = request.args.get('source')
     destination = request.args.get('destination')
     date = request.args.get('date')
+    stations = sorted(set([s['source'] for s in schedules] + [s['destination'] for s in schedules]))
     filtered = [
         s for s in schedules
         if (not source or s['source'] == source) and
@@ -109,8 +110,8 @@ def schedule():
                            schedules=filtered,
                            source=source,
                            destination=destination,
-                           date=date)
-
+                           date=date,
+                           stations=stations)
 
 @app.route('/book', methods=['GET', 'POST'])
 @login_required
