@@ -7,8 +7,8 @@
             <h2 class="mb-4 text-center">Book Your Bus</h2>
             <form action="{{ url_for('book') }}" method="post">
                 <div class="mb-2">
-                    <b>Bus:</b> {{ bus }}
-                    <input type="hidden" name="bus" value="{{ bus }}">
+                    <b>Route ID:</b> {{ bus_route_id }}
+                    <input type="hidden" name="bus_route_id" value="{{ bus_route_id }}">
                 </div>
                 <div class="mb-2">
                     <b>From:</b> {{ source }}
@@ -19,8 +19,8 @@
                     <input type="hidden" name="destination" value="{{ destination }}">
                 </div>
                 <div class="mb-2">
-                    <b>Date:</b> {{ date }}
-                    <input type="hidden" name="date" value="{{ date }}">
+                    <b>Operating Days:</b> {{ operating_days }}
+                    <input type="hidden" name="operating_days" value="{{ operating_days }}">
                 </div>
                 <div class="mb-3">
                     <b>Time:</b> {{ time }}

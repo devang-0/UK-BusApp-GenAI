@@ -10,10 +10,10 @@
                     <table class="table table-striped align-middle">
                         <thead class="table-primary">
                             <tr>
-                                <th>Bus</th>
+                                <th>Route ID</th>
                                 <th>From</th>
                                 <th>To</th>
-                                <th>Date</th>
+                                <th>Operating Days</th>
                                 <th>Time</th>
                                 <th>Passenger Name</th>
                                 <th>Passenger Email</th>
@@ -24,10 +24,10 @@
                         <tbody>
                             {% for booking in bookings %}
                             <tr>
-                                <td>{{ booking.bus }}</td>
+                                <td>{{ booking.bus_route_id }}</td>
                                 <td>{{ booking.source }}</td>
                                 <td>{{ booking.destination }}</td>
-                                <td>{{ booking.date }}</td>
+                                <td>{{ booking.operating_days }}</td>
                                 <td>{{ booking.time }}</td>
                                 <td>{{ booking.passenger_name }}</td>
                                 <td>{{ booking.passenger_email }}</td>
