@@ -5,6 +5,7 @@ import datetime
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
+from functools import wraps
 import google.generativeai as genai
 import json
 
@@ -89,7 +90,12 @@ def schedule():
         match_destination = (not destination_filter or s['destination'] == destination_filter)
 
         match_operating_days_criteria = True
-        if date_filter:
+
+        if operating_days_filter:
+            if operating_days_filter.lower() != s['operating_days'].lower():
+                match_operating_days_criteria = False
+
+        elif date_filter:
             try:
                 search_date = datetime.datetime.strptime(date_filter, '%Y-%m-%d').date()
                 day_of_week = search_date.weekday()
@@ -109,12 +115,6 @@ def schedule():
                     match_operating_days_criteria = False
             except ValueError:
                 pass
-
-        if operating_days_filter:
-            if operating_days_filter.lower() == s['operating_days'].lower():
-                match_operating_days_criteria = True
-            else:
-                match_operating_days_criteria = False
 
         if match_source and match_destination and match_operating_days_criteria:
             filtered_schedules.append(s)
