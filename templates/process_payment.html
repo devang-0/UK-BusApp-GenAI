@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}UK BusApp - Payment{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow-lg border-0 rounded-4 p-4 mt-4">
+            <h2 class="mb-4 text-center">Payment</h2>
+            <div class="alert alert-info text-center">
+                Please payment details to confirm your ticket(s) booking.
+                (No actual payment will be processed.)
+            </div>
+
+            {% if booking_details %}
+            <div class="mb-3">
+                <strong>Booking Summary:</strong><br>
+                Route: {{ booking_details.bus_route_id }} ({{ booking_details.source }} to {{ booking_details.destination }})<br>
+                Date: {{ booking_details.operating_days }} at {{ booking_details.time }}<br>
+                Tickets: {{ booking_details.num_passengers }}<br>
+                Passenger: {{ booking_details.name }} ({{ booking_details.email }})<br>
+                <strong>Total Cost: £{{ "%.2f"|format(booking_details.total_cost) }}</strong> {# NEW: Display Total Cost #}
+            </div>
+            {% endif %}
+
+            <form action="{{ url_for('process_payment') }}" method="post">
+                <div class="mb-3">
+                    <label for="card_number" class="form-label">Card Number</label>
+                    <input type="text" class="form-control" id="card_number" name="card_number" placeholder="XXXX XXXX XXXX XXXX" required>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="expiry_date" class="form-label">Expiry Date</label>
+                        <input type="text" class="form-control" id="expiry_date" name="expiry_date" placeholder="MM/YY" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="cvv" class="form-label">CVV</label>
+                        <input type="text" class="form-control" id="cvv" name="cvv" placeholder="XXX" required>
+                    </div>
+                </div>
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary btn-lg rounded-pill">Complete Payment</button>
+                </div>
+            </form>
+            <div class="text-center mt-3">
+                <a href="/" class="btn btn-secondary rounded-pill">Cancel Booking</a>
+            </div>
+        </div>
+    </div>
+    {% endblock %}

@@ -1,11 +1,10 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
 import csv
 import os
 import datetime
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from functools import wraps
 import google.generativeai as genai
 import json
 
@@ -17,7 +16,7 @@ login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 genai.configure(api_key=os.environ.get("GOOGLE_API_KEY"))
 model = genai.GenerativeModel('gemini-2.5-flash')
-
+PRICE_PER_TICKET = 10
 user_chat_history = {}
 
 class User(UserMixin, db.Model):
@@ -47,9 +46,10 @@ class Booking(db.Model):
     passenger_name = db.Column(db.String(100), nullable=False)
     passenger_email = db.Column(db.String(120), nullable=False)
     num_passengers = db.Column(db.Integer, nullable=False, default=1)
+    total_cost = db.Column(db.Float, nullable=False, default=0.0)
 
     def __repr__(self):
-        return f"Booking('{self.bus_route_id}', '{self.source}' to '{self.destination}', on '{self.operating_days}' at '{self.time}', Passengers: {self.num_passengers})"
+        return f"Booking('{self.bus_route_id}', '{self.source}' to '{self.destination}', on '{self.operating_days}' at '{self.time}', Passengers: {self.num_passengers}, Cost: £{self.total_cost:.2f})"
 
 with app.app_context():
     db.create_all()
@@ -115,7 +115,6 @@ def schedule():
                     match_operating_days_criteria = False
             except ValueError:
                 pass
-
         if match_source and match_destination and match_operating_days_criteria:
             filtered_schedules.append(s)
 
@@ -140,10 +139,13 @@ def book():
 
         passenger_name = current_user.username if current_user.is_authenticated else ''
         passenger_email = current_user.email if current_user.is_authenticated else ''
+        num_passengers = 1
 
         if not (bus_route_id and source and destination and operating_days and time):
             flash('Please select a bus from the schedule to book your seat.', 'info')
             return render_template('book_direct.html')
+
+        calculated_cost = num_passengers * PRICE_PER_TICKET
 
         return render_template('book.html',
                                bus_route_id=bus_route_id,
@@ -153,7 +155,8 @@ def book():
                                time=time,
                                passenger_name=passenger_name,
                                passenger_email=passenger_email,
-                               num_passengers=1)
+                               num_passengers=num_passengers,
+                               total_cost=calculated_cost)
     else:
         name = request.form['name']
         email = request.form['email']
@@ -164,24 +167,59 @@ def book():
         time = request.form['time']
         num_passengers = request.form.get('num_passengers', 1, type=int)
 
+        final_total_cost = num_passengers * PRICE_PER_TICKET
+
+        session['booking_details'] = {
+            'name': name,
+            'email': email,
+            'bus_route_id': bus_route_id,
+            'source': source,
+            'destination': destination,
+            'operating_days': operating_days,
+            'time': time,
+            'num_passengers': num_passengers,
+            'total_cost': final_total_cost
+        }
+        return redirect(url_for('process_payment'))
+
+@app.route('/process_payment', methods=['GET', 'POST'])
+@login_required
+def process_payment():
+    booking_details = session.get('booking_details')
+    if not booking_details:
+        flash('No booking details found. Please select a bus again.', 'danger')
+        return redirect(url_for('home'))
+    if request.method == 'POST':
+        card_number = request.form.get('card_number')
+        expiry_date = request.form.get('expiry_date')
+        cvv = request.form.get('cvv')
+
+        if not (card_number and expiry_date and cvv):
+            flash('Please provide all payment details.', 'danger')
+            return render_template('process_payment.html', booking_details=booking_details)
+
         new_booking = Booking(
             user_id=current_user.id,
-            bus_route_id=bus_route_id,
-            source=source,
-            destination=destination,
-            operating_days=operating_days,
-            time=time,
-            passenger_name=name,
-            passenger_email=email,
-            num_passengers=num_passengers
+            bus_route_id=booking_details['bus_route_id'],
+            source=booking_details['source'],
+            destination=booking_details['destination'],
+            operating_days=booking_details['operating_days'],
+            time=booking_details['time'],
+            passenger_name=booking_details['name'],
+            passenger_email=booking_details['email'],
+            num_passengers=booking_details['num_passengers'],
+            total_cost=booking_details['total_cost']
         )
         db.session.add(new_booking)
         db.session.commit()
 
-        flash(
-            f'Thank you, {name}! Your seat(s) on {bus_route_id} from {source} to {destination} ({operating_days} at {time}) are confirmed for {num_passengers} passenger(s).',
-            'success')
+        session.pop('booking_details', None)
+
+        flash(f'Payment successful! Your booking for {booking_details["bus_route_id"]} (Total: £{booking_details["total_cost"]:.2f}) is confirmed.', 'success')
         return redirect(url_for('my_bookings'))
+
+    return render_template('process_payment.html', booking_details=booking_details)
+
 
 @app.route('/confirmation')
 def confirmation():
