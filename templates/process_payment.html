@@ -4,9 +4,9 @@
 <div class="row justify-content-center">
     <div class="col-md-8 col-lg-6">
         <div class="card shadow-lg border-0 rounded-4 p-4 mt-4">
-            <h2 class="mb-4 text-center">Payment</h2>
+            <h2 class="mb-4 text-center">Simulated Payment</h2>
             <div class="alert alert-info text-center">
-                Please payment details to confirm your ticket(s) booking.
+                Please enter dummy payment details to simulate your booking.
                 (No actual payment will be processed.)
             </div>
 
@@ -17,24 +17,42 @@
                 Date: {{ booking_details.operating_days }} at {{ booking_details.time }}<br>
                 Tickets: {{ booking_details.num_passengers }}<br>
                 Passenger: {{ booking_details.name }} ({{ booking_details.email }})<br>
-                <strong>Total Cost: £{{ "%.2f"|format(booking_details.total_cost) }}</strong> {# NEW: Display Total Cost #}
+                <strong>Total Cost: £{{ "%.2f"|format(booking_details.total_cost) }}</strong>
             </div>
             {% endif %}
 
             <form action="{{ url_for('process_payment') }}" method="post">
                 <div class="mb-3">
+                    <label for="name_on_card" class="form-label">Name on Card</label>
+                    <input type="text" class="form-control" id="name_on_card" name="name_on_card" placeholder="Full Name" required>
+                </div>
+                <div class="mb-3">
                     <label for="card_number" class="form-label">Card Number</label>
-                    <input type="text" class="form-control" id="card_number" name="card_number" placeholder="XXXX XXXX XXXX XXXX" required>
+                    <input type="text" class="form-control" id="card_number" name="card_number" placeholder="XXXX XXXX XXXX XXXX" required maxlength="19">
                 </div>
                 <div class="row mb-3">
                     <div class="col-md-6">
-                        <label for="expiry_date" class="form-label">Expiry Date</label>
-                        <input type="text" class="form-control" id="expiry_date" name="expiry_date" placeholder="MM/YY" required>
+                        <label for="expiry_month" class="form-label">Expiry Month</label>
+                        <select class="form-select" id="expiry_month" name="expiry_month" required>
+                            <option value="" disabled selected>MM</option>
+                            {% for month in range(1, 13) %}
+                                <option value="{{ '%02d' % month }}">{{ '%02d' % month }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
                     <div class="col-md-6">
-                        <label for="cvv" class="form-label">CVV</label>
-                        <input type="text" class="form-control" id="cvv" name="cvv" placeholder="XXX" required>
+                        <label for="expiry_year" class="form-label">Expiry Year</label>
+                        <select class="form-select" id="expiry_year" name="expiry_year" required>
+                            <option value="" disabled selected>YY</option>
+                            {% for year in range(now.year, now.year + 11) %}
+                                <option value="{{ year }}">{{ year % 100 }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
+                </div>
+                <div class="mb-3">
+                    <label for="cvv" class="form-label">CVV</label>
+                    <input type="text" class="form-control" id="cvv" name="cvv" placeholder="XXX" required maxlength="4">
                 </div>
                 <div class="d-grid gap-2">
                     <button type="submit" class="btn btn-primary btn-lg rounded-pill">Complete Payment</button>
@@ -45,4 +63,37 @@
             </div>
         </div>
     </div>
-    {% endblock %}
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const cardNumberInput = document.getElementById('card_number');
+        const cvvInput = document.getElementById('cvv');
+        const expiryYearSelect = document.getElementById('expiry_year');
+
+        cardNumberInput.addEventListener('input', function(event) {
+            let value = event.target.value.replace(/\s/g, '');
+            let formattedValue = '';
+            for (let i = 0; i < value.length; i++) {
+                if (i > 0 && i % 4 === 0) {
+                    formattedValue += ' ';
+                }
+                formattedValue += value[i];
+            }
+            event.target.value = formattedValue;
+        });
+
+        cardNumberInput.addEventListener('keypress', function(event) {
+            if (event.key < '0' || event.key > '9') {
+                event.preventDefault();
+            }
+        });
+
+        cvvInput.addEventListener('keypress', function(event) {
+            if (event.key < '0' || event.key > '9') {
+                event.preventDefault();
+            }
+        });
+    });
+</script>
+{% endblock %}

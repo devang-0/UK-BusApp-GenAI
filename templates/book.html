@@ -52,10 +52,16 @@
 </div>
 
 <script>
-    const pricePerTicket = {{ PRICE_PER_TICKET }};
+    const pricePerTicket = {{ price_per_ticket }};
 
     function updateTotalCost() {
-        const numPassengers = document.getElementById('num_passengers').value;
+        const numPassengersInput = document.getElementById('num_passengers');
+        const numPassengers = parseInt(numPassengersInput.value);
+
+        if (isNaN(numPassengers) || numPassengers < parseInt(numPassengersInput.min) || numPassengers > parseInt(numPassengersInput.max)) {document.getElementById('display-cost').innerText = "0.00";
+            return;
+        }
+
         const total = numPassengers * pricePerTicket;
         document.getElementById('display-cost').innerText = total.toFixed(2);
     }

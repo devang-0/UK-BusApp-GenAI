@@ -47,6 +47,7 @@ class Booking(db.Model):
     passenger_email = db.Column(db.String(120), nullable=False)
     num_passengers = db.Column(db.Integer, nullable=False, default=1)
     total_cost = db.Column(db.Float, nullable=False, default=0.0)
+    name_on_card = db.Column(db.String(100), nullable=False)
 
     def __repr__(self):
         return f"Booking('{self.bus_route_id}', '{self.source}' to '{self.destination}', on '{self.operating_days}' at '{self.time}', Passengers: {self.num_passengers}, Cost: £{self.total_cost:.2f})"
@@ -156,7 +157,8 @@ def book():
                                passenger_name=passenger_name,
                                passenger_email=passenger_email,
                                num_passengers=num_passengers,
-                               total_cost=calculated_cost)
+                               total_cost=calculated_cost,
+                               price_per_ticket=PRICE_PER_TICKET)
     else:
         name = request.form['name']
         email = request.form['email']
@@ -189,14 +191,42 @@ def process_payment():
     if not booking_details:
         flash('No booking details found. Please select a bus again.', 'danger')
         return redirect(url_for('home'))
+
     if request.method == 'POST':
+        name_on_card = request.form.get('name_on_card')
         card_number = request.form.get('card_number')
-        expiry_date = request.form.get('expiry_date')
+        expiry_month = request.form.get('expiry_month')
+        expiry_year = request.form.get('expiry_year')
         cvv = request.form.get('cvv')
 
-        if not (card_number and expiry_date and cvv):
-            flash('Please provide all payment details.', 'danger')
-            return render_template('process_payment.html', booking_details=booking_details)
+        errors = []
+        if not name_on_card or len(name_on_card.strip()) == 0:
+            errors.append("Name on Card is required.")
+
+        cleaned_card_number = card_number.replace(" ", "")
+        if not cleaned_card_number.isdigit() or not (13 <= len(cleaned_card_number) <= 19):
+            errors.append("Invalid Card Number (must be 13-19 digits).")
+
+        current_year = datetime.datetime.now().year
+        current_month = datetime.datetime.now().month
+        try:
+            exp_month = int(expiry_month)
+            exp_year = int(expiry_year)
+            if not (1 <= exp_month <= 12):
+                errors.append("Invalid Expiry Month.")
+
+            if exp_year < current_year or (exp_year == current_year and exp_month < current_month):
+                errors.append("Card has expired.")
+        except ValueError:
+            errors.append("Invalid Expiry Date format.")
+
+        if not cvv or not cvv.isdigit() or not (3 <= len(cvv) <= 4):
+            errors.append("Invalid CVV (must be 3 or 4 digits).")
+
+        if errors:
+            for error in errors:
+                flash(error, 'danger')
+            return render_template('process_payment.html', booking_details=booking_details, now=datetime.datetime.now())
 
         new_booking = Booking(
             user_id=current_user.id,
@@ -208,7 +238,8 @@ def process_payment():
             passenger_name=booking_details['name'],
             passenger_email=booking_details['email'],
             num_passengers=booking_details['num_passengers'],
-            total_cost=booking_details['total_cost']
+            total_cost=booking_details['total_cost'],
+            name_on_card=name_on_card
         )
         db.session.add(new_booking)
         db.session.commit()
@@ -218,7 +249,7 @@ def process_payment():
         flash(f'Payment successful! Your booking for {booking_details["bus_route_id"]} (Total: £{booking_details["total_cost"]:.2f}) is confirmed.', 'success')
         return redirect(url_for('my_bookings'))
 
-    return render_template('process_payment.html', booking_details=booking_details)
+    return render_template('process_payment.html', booking_details=booking_details, now=datetime.datetime.now())
 
 
 @app.route('/confirmation')
@@ -321,14 +352,19 @@ def chatbot_api():
     if user_id not in user_chat_history:
         user_chat_history[user_id] = []
 
+    print(f"\n--- Chatbot Request for User {user_id} ---")
+    print(f"User Message: '{user_message}'")
+    print(f"Current History Length: {len(user_chat_history[user_id])}")
+
     try:
         temp_chat_session_for_intent = model.start_chat(history=[])
 
         intent_prompt = f"""
         Analyze the user's query and classify its primary intent into ONLY one of these exact categories:
-        - schedule_query (if asking for bus schedules, routes, times, or journeys between places, e.g., "buses from London", "schedule to Leeds", "bus", "timetable")
-        - app_help (if asking how to use the application, how to book, how to cancel, manage account, etc., e.g., "how to book", "how to cancel", "manage tickets", "help me")
-        - general_conversation (for greetings, casual chat, questions about current date/time/weather, or anything else not directly about bus schedules or app functionality)
+        - schedule_query (if they are asking for bus schedules, routes, times, or journeys between places, e.g., "buses from London", "schedule to Leeds", "bus", "timetable")
+        - app_help (if they are asking how to use the application, how to book, how to cancel, manage account, etc., e.g., "how to book", "how to cancel", "manage tickets")
+        - cost_query (if they are asking about ticket prices, total cost, or payment details, e.g., "how much does a ticket cost", "price for 2 tickets", "payment methods", "cost of 5 tickets")
+        - general_conversation (for greetings, casual chat, questions about current date, time, weather, or anything else not directly about bus schedules or app functionality)
 
         Return ONLY the category name, without any other words, punctuation, or explanation.
         Query: "{user_message}"
@@ -342,14 +378,13 @@ def chatbot_api():
 
         actual_chat_session = model.start_chat(history=user_chat_history[user_id])
 
-        if not user_chat_history[
-            user_id] and detected_intent == "general_conversation":
-            initial_system_message = {'role': 'user', 'parts': [
-                'As an AI bus assistant, respond politely and helpfully. For general queries, be conversational. For schedule-related queries, help find buses based on data provided later.']}
-            actual_chat_session = model.start_chat(history=[initial_system_message, {'role': 'model', 'parts': [
-                'Understood. I will do my best to assist you.']}])
-            user_chat_history[user_id].extend(
-                [initial_system_message, {'role': 'model', 'parts': ['Understood. I will do my best to assist you.']}])
+        if not user_chat_history[user_id]:
+            actual_chat_session.send_message(
+                "You are an AI bus assistant. Respond politely and helpfully. For specific queries like schedules, extract details. For general queries, be conversational.")
+            user_chat_history[user_id].append({'role': 'user', 'parts': [
+                "You are an AI bus assistant. Respond politely and helpfully. For specific queries like schedules, extract details. For general queries, be conversational."]})
+            user_chat_history[user_id].append(
+                {'role': 'model', 'parts': ["Understood. I will do my best to assist you."]})
 
         if detected_intent == "general_conversation":
             general_response = actual_chat_session.send_message(user_message)
@@ -358,15 +393,59 @@ def chatbot_api():
 
         elif detected_intent == "app_help":
             app_help_response = f"""
-            To book a ticket, first search for your desired route and date on the homepage or schedule page.
-            Once you find a suitable bus, click the 'Book' button next to it.
-            You will be redirected to the booking form where you can confirm details and specify the number of tickets.
-            You must be logged in to book a ticket.
-            To manage your bookings, visit the 'My Bookings' page accessible from the navigation bar after logging in.
-            There you can view your existing tickets and cancel them.
+            Hello! I can help you with how to use UK BusApp.
+
+            **To book a ticket:**
+            1. Search for your desired route and date on the homepage or schedule page.
+            2. Once you find a suitable bus, click the 'Book' button next to it.
+            3. You will be redirected to the booking form. Here, you can confirm details, specify the number of tickets (up to 5).
+            **Each ticket costs £{PRICE_PER_TICKET:.2f}, and the total cost for your booking will be displayed dynamically on this page.**
+
+            **To complete your booking:**
+            After confirming your booking details, you will proceed to a **simulated payment page**. On this page, you'll enter dummy details like Name on Card, Card Number, Expiry Date (Month/Year), and CVV. No actual payment will be processed.
+
+            **To manage your bookings:**
+            Visit the 'My Bookings' page, accessible from the navigation bar after logging in. There, you can view all your existing tickets and cancel them if needed.
+
+            You must be logged in to book or manage tickets.
             """
             final_ai_response = app_help_response
             print(f"App Help Response (predefined): '{final_ai_response}'")
+
+        elif detected_intent == "cost_query":
+            cost_extraction_prompt = f"""
+            From the user query: "{user_message}"
+            Extract the number of tickets/passengers mentioned. If no number is mentioned, return 1 (for a single ticket inquiry).
+            Return ONLY the number. E.g., "cost of 2 tickets" -> 2
+            """
+            num_tickets_response = actual_chat_session.send_message(cost_extraction_prompt)
+
+            try:
+                num_tickets = int(num_tickets_response.text.strip())
+                if num_tickets <= 0:
+                    num_tickets = 1
+                if num_tickets > 5:
+                    num_tickets = 5
+
+                calculated_cost = num_tickets * PRICE_PER_TICKET
+
+                cost_response_prompt = f"""
+                The user asked about the cost. They are asking about {num_tickets} ticket(s).
+                The price per ticket is £{PRICE_PER_TICKET:.2f}.
+                The calculated total cost is £{calculated_cost:.2f}.
+
+                Please provide a concise and helpful response about the total cost for {num_tickets} ticket(s).
+                Mention that payments are simulated on the booking page.
+                """
+                final_ai_response = actual_chat_session.send_message(cost_response_prompt).text
+
+            except ValueError:
+                final_ai_response = f"""
+                Each bus ticket costs **£{PRICE_PER_TICKET:.2f}**.
+                The total cost for your booking will be calculated on the booking page based on the number of tickets you select (up to 5).
+                Payments are simulated on a dedicated payment page after you confirm your booking details.
+                """
+            print(f"Cost Query Response (dynamic): '{final_ai_response}'")
 
         elif detected_intent == "schedule_query":
             extraction_prompt = f"""
@@ -403,9 +482,9 @@ def chatbot_api():
 
                     for s in all_schedules:
                         match_source = (
-                                    not source_query or (s['source'] and s['source'].lower() == source_query.lower()))
+                                not source_query or (s['source'] and s['source'].lower() == source_query.lower()))
                         match_destination = (not destination_query or (
-                                    s['destination'] and s['destination'].lower() == destination_query.lower()))
+                                s['destination'] and s['destination'].lower() == destination_query.lower()))
 
                         match_day_criteria = True
 
@@ -438,8 +517,8 @@ def chatbot_api():
 
                     if found_schedules:
                         schedules_text = "\n".join([
-                                                       f"Route {s['bus_route_id']} from {s['source']} to {s['destination']} ({s['operating_days']}) at {s['time']}"
-                                                       for s in found_schedules[:10]])
+                            f"Route {s['bus_route_id']} from {s['source']} to {s['destination']} ({s['operating_days']}) at {s['time']}"
+                            for s in found_schedules[:10]])
                         response_prompt = f"""
                         The user asked about bus schedules. Here are the relevant schedules found in the database based on their query:
                         ---

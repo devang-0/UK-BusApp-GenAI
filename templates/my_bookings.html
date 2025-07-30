@@ -19,6 +19,7 @@
                                 <th>Passenger Email</th>
                                 <th>Tickets</th>
                                 <th>Cost</th>
+                                <th>Name on Card</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -34,6 +35,7 @@
                                 <td>{{ booking.passenger_email }}</td>
                                 <td>{{ booking.num_passengers }}</td>
                                 <td>£{{ "%.2f"|format(booking.total_cost) }}</td>
+                                <td>{{ booking.name_on_card }}</td>
                                 <td>
                                     <form action="{{ url_for('cancel_booking', booking_id=booking.id) }}" method="post" style="display:inline;">
                                         <button type="submit" class="btn btn-danger btn-sm rounded-pill" onclick="return confirm('Are you sure you want to cancel this booking?');">Cancel</button>

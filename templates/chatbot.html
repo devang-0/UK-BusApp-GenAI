@@ -6,7 +6,6 @@
         <div class="card shadow-lg border-0 rounded-4 p-4 mt-4">
             <h2 class="mb-4 text-center">AI Bus Assistant</h2>
             <div id="chat-box" style="height: 400px; overflow-y: scroll; border: 1px solid #dee2e6; border-radius: 8px; padding: 15px; background-color: #f8f9fa;">
-                {# Chat messages will appear here #}
                 <div class="text-muted mb-2">Welcome! Ask me about bus schedules (e.g., "What buses from London to Birmingham?").</div>
             </div>
             <div class="input-group mt-3">
@@ -33,7 +32,7 @@
                 messageDiv.innerHTML = `<p class="text-start text-secondary mb-0"><strong>AI:</strong> ${message}</p>`;
             }
             chatBox.appendChild(messageDiv);
-            chatBox.scrollTop = chatBox.scrollHeight; // Scroll to bottom
+            chatBox.scrollTop = chatBox.scrollHeight;
         }
 
 
