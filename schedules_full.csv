@@ -1,145 +1,145 @@
-source,destination,operating_days,time,bus_route_id
-London,Birmingham,Daily,08:00,LBH01
-London,Birmingham,Daily,10:00,LBH01
-London,Birmingham,Daily,12:00,LBH01
-London,Birmingham,Daily,14:00,LBH01
-London,Birmingham,Daily,16:00,LBH01
-London,Birmingham,Daily,18:00,LBH01
-Birmingham,London,Daily,09:00,BHL01
-Birmingham,London,Daily,11:00,BHL01
-Birmingham,London,Daily,13:00,BHL01
-Birmingham,London,Daily,15:00,BHL01
-Birmingham,London,Daily,17:00,BHL01
-Birmingham,London,Daily,19:00,BHL01
-London,Manchester,Daily,08:30,LMA01
-London,Manchester,Daily,10:30,LMA01
-London,Manchester,Daily,12:30,LMA01
-London,Manchester,Daily,14:30,LMA01
-London,Manchester,Daily,16:30,LMA01
-London,Manchester,Daily,18:30,LMA01
-Manchester,London,Daily,09:30,MLO01
-Manchester,London,Daily,11:30,MLO01
-Manchester,London,Daily,13:30,MLO01
-Manchester,London,Daily,15:30,MLO01
-Manchester,London,Daily,17:30,MLO01
-Manchester,London,Daily,19:30,MLO01
-Manchester,Liverpool,Daily,07:30,MLI01
-Manchester,Liverpool,Daily,09:30,MLI01
-Manchester,Liverpool,Daily,11:30,MLI01
-Manchester,Liverpool,Daily,13:30,MLI01
-Manchester,Liverpool,Daily,15:30,MLI01
-Manchester,Liverpool,Daily,17:30,MLI01
-Liverpool,Manchester,Daily,08:30,LIM01
-Liverpool,Manchester,Daily,10:30,LIM01
-Liverpool,Manchester,Daily,12:30,LIM01
-Liverpool,Manchester,Daily,14:30,LIM01
-Liverpool,Manchester,Daily,16:30,LIM01
-Liverpool,Manchester,Daily,18:30,LIM01
-London,Glasgow,Daily,09:00,LGL01
-London,Glasgow,Daily,13:00,LGL01
-London,Glasgow,Daily,17:00,LGL01
-London,Glasgow,Daily,21:00,LGL01
-Glasgow,London,Daily,07:00,GLO01
-Glasgow,London,Daily,11:00,GLO01
-Glasgow,London,Daily,15:00,GLO01
-Glasgow,London,Daily,19:00,GLO01
-London,Bristol,Daily,09:30,LBR01
-London,Bristol,Daily,13:30,LBR01
-London,Bristol,Daily,17:30,LBR01
-London,Bristol,Daily,20:30,LBR01
-Bristol,London,Daily,08:30,BLO01
-Bristol,London,Daily,12:30,BLO01
-Bristol,London,Daily,16:30,BLO01
-Bristol,London,Daily,19:30,BLO01
-Birmingham,Leeds,Weekdays,08:00,BHL02
-Birmingham,Leeds,Weekdays,12:00,BHL02
-Birmingham,Leeds,Weekdays,16:00,BHL02
-Birmingham,Leeds,Weekdays,20:00,BHL02
-Leeds,Birmingham,Weekdays,09:00,LBH02
-Leeds,Birmingham,Weekdays,13:00,LBH02
-Leeds,Birmingham,Weekdays,17:00,LBH02
-Leeds,Birmingham,Weekdays,21:00,LBH02
-Glasgow,Edinburgh,Daily,07:00,GED01
-Glasgow,Edinburgh,Daily,11:00,GED01
-Glasgow,Edinburgh,Daily,15:00,GED01
-Glasgow,Edinburgh,Daily,19:00,GED01
-Edinburgh,Glasgow,Daily,08:00,EDG01
-Edinburgh,Glasgow,Daily,12:00,EDG01
-Edinburgh,Glasgow,Daily,16:00,EDG01
-Edinburgh,Glasgow,Daily,20:00,EDG01
-London,Edinburgh,Weekends,08:00,LED02
-London,Edinburgh,Weekends,12:00,LED02
-London,Edinburgh,Weekends,16:00,LED02
-London,Edinburgh,Weekends,20:00,LED02
-Edinburgh,London,Weekends,09:00,ELO01
-Edinburgh,London,Weekends,13:00,ELO01
-Edinburgh,London,Weekends,17:00,ELO01
-Edinburgh,London,Weekends,21:00,ELO01
-Manchester,Leeds,Daily,09:00,MLE01
-Manchester,Leeds,Daily,14:00,MLE01
-Manchester,Leeds,Daily,16:00,MLE01
-Manchester,Leeds,Daily,19:00,MLE01
-Leeds,Manchester,Daily,08:00,LMA02
-Leeds,Manchester,Daily,13:00,LMA02
-Leeds,Manchester,Daily,15:00,LMA02
-Leeds,Manchester,Daily,18:00,LMA02
-Birmingham,Manchester,Daily,08:30,BMN01
-Birmingham,Manchester,Daily,12:30,BMN01
-Birmingham,Manchester,Daily,16:30,BMN01
-Birmingham,Manchester,Daily,20:30,BMN01
-Manchester,Birmingham,Daily,09:30,MNB01
-Manchester,Birmingham,Daily,13:30,MNB01
-Manchester,Birmingham,Daily,17:30,MNB01
-Manchester,Birmingham,Daily,21:30,MNB01
-Liverpool,Leeds,Weekdays,09:00,LIL01
-Liverpool,Leeds,Weekdays,15:00,LIL01
-Leeds,Liverpool,Weekdays,10:00,LLI01
-Leeds,Liverpool,Weekdays,16:00,LLI01
-Cardiff,Bristol,Weekends,10:00,CBR01
-Cardiff,Bristol,Weekends,16:00,CBR01
-Bristol,Cardiff,Weekends,11:00,BCA01
-Bristol,Cardiff,Weekends,17:00,BCA01
-Newcastle,Sheffield,Weekdays,11:00,NSH01
-Newcastle,Sheffield,Weekdays,17:00,NSH01
-Sheffield,Newcastle,Weekdays,12:00,SNE01
-Sheffield,Newcastle,Weekdays,18:00,SNE01
-Nottingham,Leicester,Weekdays,09:00,NLE01
-Nottingham,Leicester,Weekdays,14:00,NLE01
-Leicester,Nottingham,Weekdays,10:00,LEN01
-Leicester,Nottingham,Weekdays,15:00,LEN01
-Brighton,Southampton,Weekends,10:00,BSO01
-Brighton,Southampton,Weekends,15:00,BSO01
-Southampton,Brighton,Weekends,11:00,SBR01
-Southampton,Brighton,Weekends,16:00,SBR01
-London,Nottingham,Weekdays,08:30,LNO01
-London,Nottingham,Weekdays,14:30,LNO01
-Nottingham,London,Weekdays,09:30,NLO01
-Nottingham,London,Weekdays,15:30,NLO01
-Birmingham,Sheffield,Weekends,10:00,BSF01
-Birmingham,Sheffield,Weekends,16:00,BSF01
-Sheffield,Birmingham,Weekends,11:00,SBH01
-Sheffield,Birmingham,Weekends,17:00,SBH01
-Manchester,Nottingham,Daily,09:00,MNO01
-Manchester,Nottingham,Daily,15:00,MNO01
-Nottingham,Manchester,Daily,10:00,NMA01
-Nottingham,Manchester,Daily,16:00,NMA01
-Leeds,Sheffield,Daily,08:00,LSF01
-Leeds,Sheffield,Daily,14:00,LSF01
-Sheffield,Leeds,Daily,09:00,SLE01
-Sheffield,Leeds,Daily,15:00,SLE01
-Leeds,Nottingham,Weekdays,08:00,LEN02
-Leeds,Nottingham,Weekdays,13:00,LEN02
-Nottingham,Leeds,Weekdays,09:00,NLE02
-Nottingham,Leeds,Weekdays,14:00,NLE02
-Edinburgh,Newcastle,Daily,09:00,ENE01
-Edinburgh,Newcastle,Daily,14:00,ENE01
-Newcastle,Edinburgh,Daily,10:00,NEE01
-Newcastle,Edinburgh,Daily,15:00,NEE01
-Cardiff,London,Daily,08:00,CLO01
-Cardiff,London,Daily,14:00,CLO01
-London,Cardiff,Daily,09:00,LCA01
-London,Cardiff,Daily,15:00,LCA01
-Southampton,London,Daily,08:30,SLO01
-Southampton,London,Daily,14:30,SLO01
-London,Southampton,Daily,09:30,LSO01
-London,Southampton,Daily,15:30,LSO01
+source,destination,operating_days,time,bus_route_id,price,duration
+London,Birmingham,Everyday,08:00,LBH01,15.00,3h 30m
+London,Birmingham,Everyday,10:00,LBH01,15.00,3h 30m
+London,Birmingham,Everyday,12:00,LBH01,15.00,3h 30m
+London,Birmingham,Everyday,14:00,LBH01,15.00,3h 30m
+London,Birmingham,Everyday,16:00,LBH01,15.00,3h 30m
+London,Birmingham,Everyday,18:00,LBH01,15.00,3h 30m
+Birmingham,London,Everyday,09:00,BHL01,15.00,3h 30m
+Birmingham,London,Everyday,11:00,BHL01,15.00,3h 30m
+Birmingham,London,Everyday,13:00,BHL01,15.00,3h 30m
+Birmingham,London,Everyday,15:00,BHL01,15.00,3h 30m
+Birmingham,London,Everyday,17:00,BHL01,15.00,3h 30m
+Birmingham,London,Everyday,19:00,BHL01,15.00,3h 30m
+London,Manchester,Everyday,08:30,LMA01,18.00,4h 0m
+London,Manchester,Everyday,10:30,LMA01,18.00,4h 0m
+London,Manchester,Everyday,12:30,LMA01,18.00,4h 0m
+London,Manchester,Everyday,14:30,LMA01,18.00,4h 0m
+London,Manchester,Everyday,16:30,LMA01,18.00,4h 0m
+London,Manchester,Everyday,18:30,LMA01,18.00,4h 0m
+Manchester,London,Everyday,09:30,MLO01,18.00,4h 0m
+Manchester,London,Everyday,11:30,MLO01,18.00,4h 0m
+Manchester,London,Everyday,13:30,MLO01,18.00,4h 0m
+Manchester,London,Everyday,15:30,MLO01,18.00,4h 0m
+Manchester,London,Everyday,17:30,MLO01,18.00,4h 0m
+Manchester,London,Everyday,19:30,MLO01,18.00,4h 0m
+Manchester,Liverpool,Everyday,07:30,MLI01,12.00,1h 30m
+Manchester,Liverpool,Everyday,09:30,MLI01,12.00,1h 30m
+Manchester,Liverpool,Everyday,11:30,MLI01,12.00,1h 30m
+Manchester,Liverpool,Everyday,13:30,MLI01,12.00,1h 30m
+Manchester,Liverpool,Everyday,15:30,MLI01,12.00,1h 30m
+Manchester,Liverpool,Everyday,17:30,MLI01,12.00,1h 30m
+Liverpool,Manchester,Everyday,08:30,LIM01,12.00,1h 30m
+Liverpool,Manchester,Everyday,10:30,LIM01,12.00,1h 30m
+Liverpool,Manchester,Everyday,12:30,LIM01,12.00,1h 30m
+Liverpool,Manchester,Everyday,14:30,LIM01,12.00,1h 30m
+Liverpool,Manchester,Everyday,16:30,LIM01,12.00,1h 30m
+Liverpool,Manchester,Everyday,18:30,LIM01,12.00,1h 30m
+London,Glasgow,Everyday,09:00,LGL01,25.00,7h 0m
+London,Glasgow,Everyday,13:00,LGL01,25.00,7h 0m
+London,Glasgow,Everyday,17:00,LGL01,25.00,7h 0m
+London,Glasgow,Everyday,21:00,LGL01,25.00,7h 0m
+Glasgow,London,Everyday,07:00,GLO01,25.00,7h 0m
+Glasgow,London,Everyday,11:00,GLO01,25.00,7h 0m
+Glasgow,London,Everyday,15:00,GLO01,25.00,7h 0m
+Glasgow,London,Everyday,19:00,GLO01,25.00,7h 0m
+London,Bristol,Everyday,09:30,LBR01,18.00,2h 30m
+London,Bristol,Everyday,13:30,LBR01,18.00,2h 30m
+London,Bristol,Everyday,17:30,LBR01,18.00,2h 30m
+London,Bristol,Everyday,20:30,LBR01,18.00,2h 30m
+Bristol,London,Everyday,08:30,BLO01,18.00,2h 30m
+Bristol,London,Everyday,12:30,BLO01,18.00,2h 30m
+Bristol,London,Everyday,16:30,BLO01,18.00,2h 30m
+Bristol,London,Everyday,19:30,BLO01,18.00,2h 30m
+Birmingham,Leeds,Weekdays,08:00,BHL02,17.00,2h 45m
+Birmingham,Leeds,Weekdays,12:00,BHL02,17.00,2h 45m
+Birmingham,Leeds,Weekdays,16:00,BHL02,17.00,2h 45m
+Birmingham,Leeds,Weekdays,20:00,BHL02,17.00,2h 45m
+Leeds,Birmingham,Weekdays,09:00,LBH02,17.00,2h 45m
+Leeds,Birmingham,Weekdays,13:00,LBH02,17.00,2h 45m
+Leeds,Birmingham,Weekdays,17:00,LBH02,17.00,2h 45m
+Leeds,Birmingham,Weekdays,21:00,LBH02,17.00,2h 45m
+Glasgow,Edinburgh,Everyday,07:00,GED01,10.00,1h 0m
+Glasgow,Edinburgh,Everyday,11:00,GED01,10.00,1h 0m
+Glasgow,Edinburgh,Everyday,15:00,GED01,10.00,1h 0m
+Glasgow,Edinburgh,Everyday,19:00,GED01,10.00,1h 0m
+Edinburgh,Glasgow,Everyday,08:00,EDG01,10.00,1h 0m
+Edinburgh,Glasgow,Everyday,12:00,EDG01,10.00,1h 0m
+Edinburgh,Glasgow,Everyday,16:00,EDG01,10.00,1h 0m
+Edinburgh,Glasgow,Everyday,20:00,EDG01,10.00,1h 0m
+London,Edinburgh,Weekends,08:00,LED02,28.00,8h 0m
+London,Edinburgh,Weekends,12:00,LED02,28.00,8h 0m
+London,Edinburgh,Weekends,16:00,LED02,28.00,8h 0m
+London,Edinburgh,Weekends,20:00,LED02,28.00,8h 0m
+Edinburgh,London,Weekends,09:00,ELO01,28.00,8h 0m
+Edinburgh,London,Weekends,13:00,ELO01,28.00,8h 0m
+Edinburgh,London,Weekends,17:00,ELO01,28.00,8h 0m
+Edinburgh,London,Weekends,21:00,ELO01,28.00,8h 0m
+Manchester,Leeds,Everyday,09:00,MLE01,14.00,1h 30m
+Manchester,Leeds,Everyday,14:00,MLE01,14.00,1h 30m
+Manchester,Leeds,Everyday,16:00,MLE01,14.00,1h 30m
+Manchester,Leeds,Everyday,19:00,MLE01,14.00,1h 30m
+Leeds,Manchester,Everyday,08:00,LMA02,14.00,1h 30m
+Leeds,Manchester,Everyday,13:00,LMA02,14.00,1h 30m
+Leeds,Manchester,Everyday,15:00,LMA02,14.00,1h 30m
+Leeds,Manchester,Everyday,18:00,LMA02,14.00,1h 30m
+Birmingham,Manchester,Everyday,08:30,BMN01,16.00,2h 0m
+Birmingham,Manchester,Everyday,12:30,BMN01,16.00,2h 0m
+Birmingham,Manchester,Everyday,16:30,BMN01,16.00,2h 0m
+Birmingham,Manchester,Everyday,20:30,BMN01,16.00,2h 0m
+Manchester,Birmingham,Everyday,09:30,MNB01,16.00,2h 0m
+Manchester,Birmingham,Everyday,13:30,MNB01,16.00,2h 0m
+Manchester,Birmingham,Everyday,17:30,MNB01,16.00,2h 0m
+Manchester,Birmingham,Everyday,21:30,MNB01,16.00,2h 0m
+Liverpool,Leeds,Weekdays,09:00,LIL01,15.00,1h 45m
+Liverpool,Leeds,Weekdays,15:00,LIL01,15.00,1h 45m
+Leeds,Liverpool,Weekdays,10:00,LLI01,15.00,1h 45m
+Leeds,Liverpool,Weekdays,16:00,LLI01,15.00,1h 45m
+Cardiff,Bristol,Weekends,10:00,CBR01,12.00,1h 15m
+Cardiff,Bristol,Weekends,16:00,CBR01,12.00,1h 15m
+Bristol,Cardiff,Weekends,11:00,BCA01,12.00,1h 15m
+Bristol,Cardiff,Weekends,17:00,BCA01,12.00,1h 15m
+Newcastle,Sheffield,Weekdays,11:00,NSH01,22.00,3h 0m
+Newcastle,Sheffield,Weekdays,17:00,NSH01,22.00,3h 0m
+Sheffield,Newcastle,Weekdays,12:00,SNE01,22.00,3h 0m
+Sheffield,Newcastle,Weekdays,18:00,SNE01,22.00,3h 0m
+Nottingham,Leicester,Weekdays,09:00,NLE01,10.00,0h 45m
+Nottingham,Leicester,Weekdays,14:00,NLE01,10.00,0h 45m
+Leicester,Nottingham,Weekdays,10:00,LEN01,10.00,0h 45m
+Leicester,Nottingham,Weekdays,15:00,LEN01,10.00,0h 45m
+Brighton,Southampton,Weekends,10:00,BSO01,18.00,1h 30m
+Brighton,Southampton,Weekends,15:00,BSO01,18.00,1h 30m
+Southampton,Brighton,Weekends,11:00,SBR01,18.00,1h 30m
+Southampton,Brighton,Weekends,16:00,SBR01,18.00,1h 30m
+London,Nottingham,Weekdays,08:30,LNO01,20.00,3h 0m
+London,Nottingham,Weekdays,14:30,LNO01,20.00,3h 0m
+Nottingham,London,Weekdays,09:30,NLO01,20.00,3h 0m
+Nottingham,London,Weekdays,15:30,NLO01,20.00,3h 0m
+Birmingham,Sheffield,Weekends,10:00,BSF01,19.00,2h 15m
+Birmingham,Sheffield,Weekends,16:00,BSF01,19.00,2h 15m
+Sheffield,Birmingham,Weekends,11:00,SBH01,19.00,2h 15m
+Sheffield,Birmingham,Weekends,17:00,SBH01,19.00,2h 15m
+Manchester,Nottingham,Everyday,09:00,MNO01,16.00,1h 45m
+Manchester,Nottingham,Everyday,15:00,MNO01,16.00,1h 45m
+Nottingham,Manchester,Everyday,10:00,NMA01,16.00,1h 45m
+Nottingham,Manchester,Everyday,16:00,NMA01,16.00,1h 45m
+Leeds,Sheffield,Everyday,08:00,LSF01,12.00,1h 0m
+Leeds,Sheffield,Everyday,14:00,LSF01,12.00,1h 0m
+Sheffield,Leeds,Everyday,09:00,SLE01,12.00,1h 0m
+Sheffield,Leeds,Everyday,15:00,SLE01,12.00,1h 0m
+Leeds,Nottingham,Weekdays,08:00,LEN02,17.00,2h 15m
+Leeds,Nottingham,Weekdays,13:00,LEN02,17.00,2h 15m
+Nottingham,Leeds,Weekdays,09:00,NLE02,17.00,2h 15m
+Nottingham,Leeds,Weekdays,14:00,NLE02,17.00,2h 15m
+Edinburgh,Newcastle,Everyday,09:00,ENE01,20.00,2h 30m
+Edinburgh,Newcastle,Everyday,14:00,ENE01,20.00,2h 30m
+Newcastle,Edinburgh,Everyday,10:00,NEE01,20.00,2h 30m
+Newcastle,Edinburgh,Everyday,15:00,NEE01,20.00,2h 30m
+Cardiff,London,Everyday,08:00,CLO01,25.00,3h 45m
+Cardiff,London,Everyday,14:00,CLO01,25.00,3h 45m
+London,Cardiff,Everyday,09:00,LCA01,25.00,3h 45m
+London,Cardiff,Everyday,15:00,LCA01,25.00,3h 45m
+Southampton,London,Everyday,08:30,SLO01,19.00,2h 15m
+Southampton,London,Everyday,14:30,SLO01,19.00,2h 15m
+London,Southampton,Everyday,09:30,LSO01,19.00,2h 15m
+London,Southampton,Everyday,15:30,LSO01,19.00,2h 15m
