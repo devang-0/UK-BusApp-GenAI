@@ -16,8 +16,8 @@ login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 genai.configure(api_key=os.environ.get("GOOGLE_API_KEY"))
 model = genai.GenerativeModel('gemini-2.5-flash')
-PRICE_PER_TICKET = 10
 user_chat_history = {}
+
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -35,6 +35,7 @@ class User(UserMixin, db.Model):
     def __repr__(self):
         return f"User('{self.username}', '{self.email}')"
 
+
 class Booking(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -46,14 +47,19 @@ class Booking(db.Model):
     passenger_name = db.Column(db.String(100), nullable=False)
     passenger_email = db.Column(db.String(120), nullable=False)
     num_passengers = db.Column(db.Integer, nullable=False, default=1)
+    price = db.Column(db.Float, nullable=False, default=0.0)
+    duration = db.Column(db.String(20), nullable=False)
     total_cost = db.Column(db.Float, nullable=False, default=0.0)
     name_on_card = db.Column(db.String(100), nullable=False)
+    status = db.Column(db.String(20), nullable=False, default='Confirmed')
 
     def __repr__(self):
-        return f"Booking('{self.bus_route_id}', '{self.source}' to '{self.destination}', on '{self.operating_days}' at '{self.time}', Passengers: {self.num_passengers}, Cost: £{self.total_cost:.2f})"
+        return f"Booking('{self.bus_route_id}', '{self.source}' to '{self.destination}', on '{self.operating_days}' at '{self.time}', Passengers: {self.num_passengers}, Cost: £{self.total_cost:.2f}')"
+
 
 with app.app_context():
     db.create_all()
+
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -69,11 +75,13 @@ def load_schedules():
             schedules.append(row)
     return schedules
 
+
 @app.route('/')
 def home():
     schedules = load_schedules()
     stations = sorted(set([s['source'] for s in schedules] + [s['destination'] for s in schedules]))
     return render_template('home.html', stations=stations)
+
 
 @app.route('/schedule')
 def schedule():
@@ -81,52 +89,48 @@ def schedule():
     source_filter = request.args.get('source')
     destination_filter = request.args.get('destination')
     date_filter = request.args.get('date')
-    operating_days_filter = request.args.get('operating_days')
 
     stations = sorted(set([s['source'] for s in schedules] + [s['destination'] for s in schedules]))
-    operating_days_options = sorted(list(set([s['operating_days'] for s in schedules])))
     filtered_schedules = []
-    for s in schedules:
-        match_source = (not source_filter or s['source'] == source_filter)
-        match_destination = (not destination_filter or s['destination'] == destination_filter)
 
-        match_operating_days_criteria = True
+    if source_filter or destination_filter or date_filter:
+        for s in schedules:
+            match_source = (not source_filter or s['source'] == source_filter)
+            match_destination = (not destination_filter or s['destination'] == destination_filter)
 
-        if operating_days_filter:
-            if operating_days_filter.lower() != s['operating_days'].lower():
-                match_operating_days_criteria = False
+            match_operating_days_criteria = True
 
-        elif date_filter:
-            try:
-                search_date = datetime.datetime.strptime(date_filter, '%Y-%m-%d').date()
-                day_of_week = search_date.weekday()
+            if date_filter:
+                try:
+                    search_date = datetime.datetime.strptime(date_filter, '%Y-%m-%d').date()
+                    day_of_week = search_date.weekday()
 
-                is_weekday = day_of_week < 5
-                is_weekend = day_of_week >= 5
+                    is_weekday = day_of_week < 5
+                    is_weekend = day_of_week >= 5
 
-                schedule_day_type = s['operating_days'].lower()
+                    schedule_day_type = s['operating_days'].lower()
 
-                if schedule_day_type == 'daily':
-                    match_operating_days_criteria = True
-                elif schedule_day_type == 'weekdays' and is_weekday:
-                    match_operating_days_criteria = True
-                elif schedule_day_type == 'weekends' and is_weekend:
-                    match_operating_days_criteria = True
-                else:
-                    match_operating_days_criteria = False
-            except ValueError:
-                pass
-        if match_source and match_destination and match_operating_days_criteria:
-            filtered_schedules.append(s)
+                    if schedule_day_type == 'everyday':
+                        match_operating_days_criteria = True
+                    elif schedule_day_type == 'weekdays' and is_weekday:
+                        match_operating_days_criteria = True
+                    elif schedule_day_type == 'weekends' and is_weekend:
+                        match_operating_days_criteria = True
+                    else:
+                        match_operating_days_criteria = False
+                except ValueError:
+                    pass
+
+            if match_source and match_destination and match_operating_days_criteria:
+                filtered_schedules.append(s)
 
     return render_template('schedule.html',
                            schedules=filtered_schedules,
                            source=source_filter,
                            destination=destination_filter,
                            date=date_filter,
-                           operating_days=operating_days_filter,
-                           stations=stations,
-                           operating_days_options=operating_days_options)
+                           stations=stations)
+
 
 @app.route('/book', methods=['GET', 'POST'])
 @login_required
@@ -137,6 +141,8 @@ def book():
         destination = request.args.get('destination')
         operating_days = request.args.get('operating_days')
         time = request.args.get('time')
+        price = request.args.get('price')
+        duration = request.args.get('duration')
 
         passenger_name = current_user.username if current_user.is_authenticated else ''
         passenger_email = current_user.email if current_user.is_authenticated else ''
@@ -146,7 +152,7 @@ def book():
             flash('Please select a bus from the schedule to book your seat.', 'info')
             return render_template('book_direct.html')
 
-        calculated_cost = num_passengers * PRICE_PER_TICKET
+        calculated_cost = num_passengers * float(price) if price else 0.0
 
         return render_template('book.html',
                                bus_route_id=bus_route_id,
@@ -154,11 +160,12 @@ def book():
                                destination=destination,
                                operating_days=operating_days,
                                time=time,
+                               price=float(price) if price else 0.0,
+                               duration=duration,
                                passenger_name=passenger_name,
                                passenger_email=passenger_email,
                                num_passengers=num_passengers,
-                               total_cost=calculated_cost,
-                               price_per_ticket=PRICE_PER_TICKET)
+                               total_cost=calculated_cost)
     else:
         name = request.form['name']
         email = request.form['email']
@@ -167,9 +174,11 @@ def book():
         destination = request.form['destination']
         operating_days = request.form['operating_days']
         time = request.form['time']
+        price = request.form['price']
+        duration = request.form['duration']
         num_passengers = request.form.get('num_passengers', 1, type=int)
 
-        final_total_cost = num_passengers * PRICE_PER_TICKET
+        final_total_cost = num_passengers * float(price) if price else 0.0
 
         session['booking_details'] = {
             'name': name,
@@ -179,10 +188,13 @@ def book():
             'destination': destination,
             'operating_days': operating_days,
             'time': time,
+            'price': price,
+            'duration': duration,
             'num_passengers': num_passengers,
             'total_cost': final_total_cost
         }
         return redirect(url_for('process_payment'))
+
 
 @app.route('/process_payment', methods=['GET', 'POST'])
 @login_required
@@ -214,7 +226,6 @@ def process_payment():
             exp_year = int(expiry_year)
             if not (1 <= exp_month <= 12):
                 errors.append("Invalid Expiry Month.")
-
             if exp_year < current_year or (exp_year == current_year and exp_month < current_month):
                 errors.append("Card has expired.")
         except ValueError:
@@ -238,15 +249,20 @@ def process_payment():
             passenger_name=booking_details['name'],
             passenger_email=booking_details['email'],
             num_passengers=booking_details['num_passengers'],
+            price=float(booking_details['price']),
+            duration=booking_details['duration'],
             total_cost=booking_details['total_cost'],
-            name_on_card=name_on_card
+            name_on_card=name_on_card,
+            status='Confirmed'
         )
         db.session.add(new_booking)
         db.session.commit()
 
         session.pop('booking_details', None)
 
-        flash(f'Payment successful! Your booking for {booking_details["bus_route_id"]} (Total: £{booking_details["total_cost"]:.2f}) is confirmed.', 'success')
+        flash(
+            f'Payment successful! Your booking for {booking_details["bus_route_id"]} (Total: £{booking_details["total_cost"]:.2f}) is confirmed.',
+            'success')
         return redirect(url_for('my_bookings'))
 
     return render_template('process_payment.html', booking_details=booking_details, now=datetime.datetime.now())
@@ -260,8 +276,12 @@ def confirmation():
     destination = request.args.get('destination')
     operating_days = request.args.get('operating_days')
     time = request.args.get('time')
+    price = request.args.get('price')
+    duration = request.args.get('duration')
     return render_template('confirmation.html', name=name, bus_route_id=bus_route_id, source=source,
-                           destination=destination, operating_days=operating_days, time=time)
+                           destination=destination, operating_days=operating_days, time=time, price=price,
+                           duration=duration)
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -290,6 +310,7 @@ def register():
         return redirect(url_for('login'))
     return render_template('register.html')
 
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
@@ -308,6 +329,7 @@ def login():
             flash('Login Unsuccessful. Please check email and password', 'danger')
     return render_template('login.html')
 
+
 @app.route('/logout')
 @login_required
 def logout():
@@ -320,7 +342,7 @@ def logout():
 @login_required
 def my_bookings():
     user_id = current_user.id
-    bookings = current_user.bookings
+    bookings = Booking.query.filter_by(user_id=user_id).order_by(Booking.id.desc()).all()
     return render_template('my_bookings.html', bookings=bookings)
 
 @app.route('/cancel_booking/<int:booking_id>', methods=['POST'])
@@ -332,11 +354,27 @@ def cancel_booking(booking_id):
         flash('You are not authorized to cancel this booking.', 'danger')
         return redirect(url_for('my_bookings'))
 
-    db.session.delete(booking)
+    booking.status = 'Cancelled'
+    db.session.commit()
+
+    flash(f'Your booking for {booking.bus_route_id} from {booking.source} to {booking.destination} has been cancelled. Please note that no refunds are provided.', 'success')
+    return redirect(url_for('my_bookings'))
+
+
+@app.route('/cancel_booking/<int:booking_id>/confirmed', methods=['POST'])
+@login_required
+def cancel_booking_confirmed(booking_id):
+    booking = Booking.query.get_or_404(booking_id)
+    if booking.user_id != current_user.id:
+        flash('You are not authorized to cancel this booking.', 'danger')
+        return redirect(url_for('my_bookings'))
+
+    booking.status = 'Cancelled'
     db.session.commit()
 
     flash(
-        f'Your booking for {booking.bus_route_id} from {booking.source} to {booking.destination} on {booking.operating_days} at {booking.time} has been cancelled.', 'success')
+        f'Your booking for {booking.bus_route_id} from {booking.source} to {booking.destination} has been cancelled. Please note that no refunds are provided.',
+        'success')
     return redirect(url_for('my_bookings'))
 
 
@@ -352,19 +390,15 @@ def chatbot_api():
     if user_id not in user_chat_history:
         user_chat_history[user_id] = []
 
-    print(f"\n--- Chatbot Request for User {user_id} ---")
-    print(f"User Message: '{user_message}'")
-    print(f"Current History Length: {len(user_chat_history[user_id])}")
-
     try:
         temp_chat_session_for_intent = model.start_chat(history=[])
 
         intent_prompt = f"""
-        Analyze the user's query and classify its primary intent into ONLY one of these exact categories:
-        - schedule_query (if they are asking for bus schedules, routes, times, or journeys between places, e.g., "buses from London", "schedule to Leeds", "bus", "timetable")
-        - app_help (if they are asking how to use the application, how to book, how to cancel, manage account, etc., e.g., "how to book", "how to cancel", "manage tickets")
-        - cost_query (if they are asking about ticket prices, total cost, or payment details, e.g., "how much does a ticket cost", "price for 2 tickets", "payment methods", "cost of 5 tickets")
-        - general_conversation (for greetings, casual chat, questions about current date, time, weather, or anything else not directly about bus schedules or app functionality)
+        Classify the user's query into one of these categories:
+        - "schedule_query" (if they are asking for bus schedules, routes, times, or journeys between places, e.g., "buses from London", "schedule to Leeds", "bus", "timetable")
+        - "app_help" (if they are asking how to use the application, how to book, how to cancel, manage account, etc., e.g., "how to book", "how to cancel", "manage tickets")
+        - "cost_query" (if they are asking about ticket prices, total cost, or payment details, e.g., "how much does a ticket cost", "price for 2 tickets", "payment methods")
+        - "general_conversation" (for greetings, casual chat, questions about current date, time, weather, or anything else not directly about bus schedules or app functionality)
 
         Return ONLY the category name, without any other words, punctuation, or explanation.
         Query: "{user_message}"
@@ -378,13 +412,12 @@ def chatbot_api():
 
         actual_chat_session = model.start_chat(history=user_chat_history[user_id])
 
-        if not user_chat_history[user_id]:
-            actual_chat_session.send_message(
-                "You are an AI bus assistant. Respond politely and helpfully. For specific queries like schedules, extract details. For general queries, be conversational.")
-            user_chat_history[user_id].append({'role': 'user', 'parts': [
-                "You are an AI bus assistant. Respond politely and helpfully. For specific queries like schedules, extract details. For general queries, be conversational."]})
-            user_chat_history[user_id].append(
-                {'role': 'model', 'parts': ["Understood. I will do my best to assist you."]})
+        if not user_chat_history[
+            user_id] and detected_intent == "general_conversation":
+            initial_system_message = {'role': 'user', 'parts': [
+                'As an AI bus assistant, respond politely and helpfully. For general queries, be conversational. For schedule-related queries, help find buses based on data provided later.']}
+            actual_chat_session = model.start_chat(history=[initial_system_message, {'role': 'model', 'parts': ['Understood. I will do my best to assist you.']}])
+            user_chat_history[user_id].extend([initial_system_message, {'role': 'model', 'parts': ['Understood. I will do my best to assist you.']}])
 
         if detected_intent == "general_conversation":
             general_response = actual_chat_session.send_message(user_message)
@@ -399,7 +432,7 @@ def chatbot_api():
             1. Search for your desired route and date on the homepage or schedule page.
             2. Once you find a suitable bus, click the 'Book' button next to it.
             3. You will be redirected to the booking form. Here, you can confirm details, specify the number of tickets (up to 5).
-            **Each ticket costs £{PRICE_PER_TICKET:.2f}, and the total cost for your booking will be displayed dynamically on this page.**
+            **Each ticket has a unique price that will be displayed on the booking page, and the total cost will be dynamically calculated.**
 
             **To complete your booking:**
             After confirming your booking details, you will proceed to a **simulated payment page**. On this page, you'll enter dummy details like Name on Card, Card Number, Expiry Date (Month/Year), and CVV. No actual payment will be processed.
@@ -427,30 +460,34 @@ def chatbot_api():
                 if num_tickets > 5:
                     num_tickets = 5
 
-                calculated_cost = num_tickets * PRICE_PER_TICKET
+                sample_schedules = load_schedules()
+                sample_price = float(sample_schedules[0]['price']) if sample_schedules else 0.0
+
+                calculated_cost = num_tickets * sample_price
 
                 cost_response_prompt = f"""
                 The user asked about the cost. They are asking about {num_tickets} ticket(s).
-                The price per ticket is £{PRICE_PER_TICKET:.2f}.
-                The calculated total cost is £{calculated_cost:.2f}.
+                The price per ticket is dynamic and varies by route, but a typical price is around £{sample_price:.2f}.
+                The calculated total cost for this example would be £{calculated_cost:.2f}.
 
                 Please provide a concise and helpful response about the total cost for {num_tickets} ticket(s).
-                Mention that payments are simulated on the booking page.
+                Mention that the exact price is shown on the booking page.
                 """
-                final_ai_response = actual_chat_session.send_message(cost_response_prompt).text
+                final_response = actual_chat_session.send_message(cost_response_prompt)
+                final_ai_response = final_response.text
+                print(f"Cost Query Response (dynamic): '{final_ai_response}'")
 
             except ValueError:
                 final_ai_response = f"""
-                Each bus ticket costs **£{PRICE_PER_TICKET:.2f}**.
-                The total cost for your booking will be calculated on the booking page based on the number of tickets you select (up to 5).
+                Each bus ticket has a dynamic price that varies by route. The total cost will be calculated and displayed on the booking page based on the number of tickets you select (up to 5).
                 Payments are simulated on a dedicated payment page after you confirm your booking details.
                 """
-            print(f"Cost Query Response (dynamic): '{final_ai_response}'")
+                print(f"Cost Query Response (fallback): '{final_ai_response}'")
 
         elif detected_intent == "schedule_query":
             extraction_prompt = f"""
             Extract bus travel information from the following user query.
-            Look for: 'source city', 'destination city', and 'travel day' (e.g., "Daily", "Weekdays", "Weekends", or a specific date in YYYY-MM-DD format).
+            Look for: 'source city', 'destination city', and 'travel day' (e.g., "Everyday", "Weekdays", "Weekends", or a specific date in YYYY-MM-DD format).
             Return the information as a JSON object. If a piece of information is not found, use null.
             Example: "I want to go from London to Birmingham on 2025-07-28." -> {{"source": "London", "destination": "Birmingham", "day_type": null, "date": "2025-07-28"}}
             Example: "Buses to Manchester on weekends" -> {{"source": null, "destination": "Manchester", "day_type": "Weekends", "date": null}}
@@ -501,7 +538,7 @@ def chatbot_api():
 
                                 schedule_day_type = s['operating_days'].lower()
 
-                                if schedule_day_type == 'daily':
+                                if schedule_day_type == 'everyday':
                                     pass
                                 elif schedule_day_type == 'weekdays' and is_weekday:
                                     pass
@@ -565,6 +602,7 @@ def chatbot_api():
     except Exception as e:
         print(f"Global Error calling Gemini API: {e}")
         return jsonify({"response": "Sorry, I'm having trouble connecting to the AI. Please try again later."}), 500
+
 
 @app.route('/chatbot')
 @login_required

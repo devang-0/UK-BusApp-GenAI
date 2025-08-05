@@ -9,7 +9,7 @@
             <div class="mb-4 p-3 border rounded">
                 <h4 class="mb-3">Refine Your Search</h4>
                 <form action="/schedule" method="get" class="row g-3">
-                    <div class="col-md-3">
+                    <div class="col-md-5">
                         <label for="source-filter" class="form-label visually-hidden">From</label>
                         <select class="form-select" id="source-filter" name="source">
                             <option value="">Any Source</option>
@@ -18,7 +18,7 @@
                             {% endfor %}
                         </select>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-5">
                         <label for="destination-filter" class="form-label visually-hidden">To</label>
                         <select class="form-select" id="destination-filter" name="destination">
                             <option value="">Any Destination</option>
@@ -27,16 +27,7 @@
                             {% endfor %}
                         </select>
                     </div>
-                    <div class="col-md-3">
-                        <label for="operating-days-filter" class="form-label visually-hidden">Operating Days</label>
-                        <select class="form-select" id="operating-days-filter" name="operating_days">
-                            <option value="">Any Days</option>
-                            {% for option in operating_days_options %}
-                                <option value="{{ option }}" {% if option == operating_days %}selected{% endif %}>{{ option }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <label for="date-filter" class="form-label visually-hidden">Date</label>
                         <input type="date" class="form-control" id="date-filter" name="date" value="{{ date if date }}">
                     </div>
@@ -47,13 +38,12 @@
                 </form>
             </div>
 
-            <p class="text-center">
-                {% if source %} <b>From:</b> {{ source }} {% endif %}
-                {% if destination %} <b>To:</b> {{ destination }} {% endif %}
-                {% if date %} <b>Date:</b> {{ date }} {% endif %}
-                {% if operating_days %} <b>Operating Days:</b> {{ operating_days }} {% endif %}
-            </p>
             {% if schedules %}
+                <p class="text-center">
+                    {% if source %} <b>From:</b> {{ source }} {% endif %}
+                    {% if destination %} <b>To:</b> {{ destination }} {% endif %}
+                    {% if date %} <b>Date:</b> {{ date }} {% endif %}
+                </p>
                 <div class="table-responsive">
                     <table class="table table-striped align-middle">
                         <thead class="table-primary">
@@ -63,6 +53,8 @@
                                 <th>Destination</th>
                                 <th>Operating Days</th>
                                 <th>Time</th>
+                                <th>Price</th>
+                                <th>Duration</th>
                                 <th>Book</th>
                             </tr>
                         </thead>
@@ -74,16 +66,20 @@
                                 <td>{{ s.destination }}</td>
                                 <td>{{ s.operating_days }}</td>
                                 <td>{{ s.time }}</td>
+                                <td>£{{ s.price }}</td>
+                                <td>{{ s.duration }}</td>
                                 <td>
-                                    <a href="{{ url_for('book', bus_route_id=s.bus_route_id, source=s.source, destination=s.destination, operating_days=s.operating_days, time=s.time) }}" class="btn btn-success btn-sm rounded-pill">Book</a>
+                                    <a href="{{ url_for('book', bus_route_id=s.bus_route_id, source=s.source, destination=s.destination, operating_days=s.operating_days, time=s.time, price=s.price, duration=s.duration) }}" class="btn btn-success btn-sm rounded-pill">Book</a>
                                 </td>
                             </tr>
                             {% endfor %}
                         </tbody>
                     </table>
                 </div>
-            {% else %}
+            {% elif request.args.get('source') or request.args.get('destination') or request.args.get('date') %}
                 <div class="alert alert-warning text-center">No schedules found for your search.</div>
+            {% else %}
+                <div class="alert alert-info text-center">Please use the filters above to search for bus schedules.</div>
             {% endif %}
             <div class="text-center mt-3">
                 <a href="/" class="btn btn-secondary rounded-pill">Back to Home</a>

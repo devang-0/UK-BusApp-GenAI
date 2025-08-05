@@ -7,7 +7,8 @@
             <h2 class="mb-4">Booking Confirmed!</h2>
             <div class="alert alert-success">
                 Thank you, <b>{{ name }}</b>!<br>
-                Your seat on <b>{{ bus_route_id }}</b> from <b>{{ source }}</b> to <b>{{ destination }}</b> on <b>{{ operating_days }}</b> at <b>{{ time }}</b> is confirmed.
+                Your seat on <b>{{ bus_route_id }}</b> from <b>{{ source }}</b> to <b>{{ destination }}</b> on <b>{{ operating_days }}</b> at <b>{{ time }}</b> is confirmed.<br>
+                Duration: **{{ duration }}** for £**{{ "%.2f"|format(price) }}** per ticket.
             </div>
             <a href="/" class="btn btn-primary rounded-pill mt-3">Book Another Ticket</a>
         </div>
