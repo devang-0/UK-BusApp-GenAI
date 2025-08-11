@@ -21,6 +21,7 @@
         const chatBox = document.getElementById('chat-box');
         const userInput = document.getElementById('user-input');
         const sendButton = document.getElementById('send-button');
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
 
         function addMessage(sender, message) {
@@ -48,7 +49,9 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
+                        , 'X-CSRFToken': csrfToken
                     },
+
                     body: JSON.stringify({ message: message })
                 });
 
