@@ -7,10 +7,14 @@ from flask_login import LoginManager, UserMixin, login_user, logout_user, login_
 from werkzeug.security import generate_password_hash, check_password_hash
 import google.generativeai as genai
 import json
+from flask_wtf.csrf import CSRFProtect
+from dotenv import load_dotenv
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'notsecret'
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
+csrf = CSRFProtect(app)
+load_dotenv()
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
@@ -608,10 +612,6 @@ def chatbot_api():
 @login_required
 def chatbot_page():
     return render_template('chatbot.html')
-
-
-with app.app_context():
-    db.create_all()
 
 if __name__ == '__main__':
     app.run(debug=True)

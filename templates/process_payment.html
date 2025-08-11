@@ -22,6 +22,7 @@
             {% endif %}
 
             <form action="{{ url_for('process_payment') }}" method="post">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div class="mb-3">
                     <label for="name_on_card" class="form-label">Name on Card</label>
                     <input type="text" class="form-control" id="name_on_card" name="name_on_card" placeholder="Full Name" required>

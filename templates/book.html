@@ -6,6 +6,7 @@
         <div class="card shadow-lg border-0 rounded-4 p-4 mt-4">
             <h2 class="mb-4 text-center">Book Your Bus</h2>
             <form action="{{ url_for('book') }}" method="post">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div class="mb-2">
                     <b>Route ID:</b> {{ bus_route_id }}
                     <input type="hidden" name="bus_route_id" value="{{ bus_route_id }}">
