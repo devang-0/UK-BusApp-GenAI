@@ -4,7 +4,7 @@
 <div class="row justify-content-center">
     <div class="col-md-8 col-lg-6">
         <div class="card shadow-lg border-0 rounded-4 p-4 mt-4">
-            <h2 class="mb-4 text-center">Simulated Payment</h2>
+            <h2 class="mb-4 text-center">Payment (DEMO)</h2>
             <div class="alert alert-info text-center">
                 Please enter dummy payment details to simulate your booking.
                 (No actual payment will be processed.)
@@ -45,7 +45,7 @@
                         <label for="expiry_year" class="form-label">Expiry Year</label>
                         <select class="form-select" id="expiry_year" name="expiry_year" required>
                             <option value="" disabled selected>YY</option>
-                            {% for year in range(now.year, now.year + 11) %}
+                            {% for year in range(now.year, now.year + 15) %}
                                 <option value="{{ year }}">{{ year % 100 }}</option>
                             {% endfor %}
                         </select>

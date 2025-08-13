@@ -359,7 +359,7 @@ def cancel_booking(booking_id):
     booking.status = 'Cancelled'
     db.session.commit()
 
-    flash(f'Your booking for {booking.bus_route_id} from {booking.source} to {booking.destination} has been cancelled. Please note that no refunds are provided.', 'success')
+    flash(f'Your booking for {booking.bus_route_id} from {booking.source} to {booking.destination} has been cancelled. Please note that no refunds will be provided.', 'success')
     return redirect(url_for('my_bookings'))
 
 
@@ -493,3 +493,4 @@ def chatbot_page():
 
 if __name__ == '__main__':
     app.run(debug=True)
+    #app.run(host='0.0.0.0', port=8080, debug=True) #To access the app from any device on the same network.

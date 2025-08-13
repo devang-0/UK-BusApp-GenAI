@@ -6,7 +6,7 @@
         <div class="card shadow-lg border-0 rounded-4 p-4 mt-4">
             <div class="card-body text-center">
                 <h1 class="display-5 mb-3">Welcome to UK BusApp</h1>
-                <p class="lead mb-4">Plan your UK bus journey with ease</p>
+                <p class="lead mb-4">Book your UK BUS tickets with ease</p>
                 <form action="/schedule" method="get" class="row g-3 justify-content-center">
                     <div class="col-md-12 col-lg-8">
                         <div class="input-group mb-3">
@@ -38,10 +38,10 @@
                 </form>
 
                 <hr class="my-4">
-                <h3 class="mb-3">Need help planning your journey?</h3>
-                <p class="lead">Chat with our AI Assistant for smart route suggestions and information!</p>
+                <h3 class="mb-3">Need Any help?</h3>
+                <p class="lead">Chat with our AI Assistant!</p>
                 <a href="{{ url_for('chatbot_page') }}" class="btn btn-info btn-lg rounded-pill mb-4">
-                    <i class="fas fa-robot me-2"></i> Talk to AI Assistant
+                    <i class="fas fa-robot me-2"></i> Chat with AI Assistant
                 </a>
 
                 {% if current_user.is_authenticated %}
@@ -49,7 +49,7 @@
                 <h3 class="mb-3">Welcome Back, {{ current_user.username }}!</h3>
                 <p class="lead">Ready to manage your trips?</p>
                 <a href="{{ url_for('my_bookings') }}" class="btn btn-success btn-lg rounded-pill">
-                    <i class="fas fa-ticket-alt me-2"></i> View My Bookings
+                    <i class="fas fa-ticket-alt me-2"></i> Manage My Bookings
                 </a>
                 {% endif %}
 
