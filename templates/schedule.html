@@ -69,7 +69,7 @@
                                 <td>£{{ s.price }}</td>
                                 <td>{{ s.duration }}</td>
                                 <td>
-                                    <a href="{{ url_for('book', bus_route_id=s.bus_route_id, source=s.source, destination=s.destination, operating_days=s.operating_days, time=s.time, price=s.price, duration=s.duration) }}" class="btn btn-success btn-sm rounded-pill">Book</a>
+                                    <a href="{{ url_for('book', bus_route_id=s.bus_route_id, time=s.time) }}" class="btn btn-success btn-sm rounded-pill">Book</a>
                                 </td>
                             </tr>
                             {% endfor %}

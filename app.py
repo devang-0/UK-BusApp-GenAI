@@ -11,13 +11,13 @@ from flask_wtf.csrf import CSRFProtect
 from dotenv import load_dotenv
 
 app = Flask(__name__)
+load_dotenv()
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
 genai.configure(api_key=os.environ.get("GOOGLE_API_KEY"))
 model = genai.GenerativeModel('gemini-2.5-flash')
 user_chat_history = {}
 csrf = CSRFProtect(app)
-load_dotenv()
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
@@ -142,35 +142,43 @@ def schedule():
 def book():
     if request.method == 'GET':
         bus_route_id = request.args.get('bus_route_id')
-        source = request.args.get('source')
-        destination = request.args.get('destination')
-        operating_days = request.args.get('operating_days')
         time = request.args.get('time')
-        price = request.args.get('price')
-        duration = request.args.get('duration')
 
-        passenger_name = current_user.username if current_user.is_authenticated else ''
-        passenger_email = current_user.email if current_user.is_authenticated else ''
-        num_passengers = 1
-
-        if not (bus_route_id and source and destination and operating_days and time):
+        if not bus_route_id or not time:
             flash('Please select a bus from the schedule to book your seat.', 'info')
             return render_template('book_direct.html')
 
-        calculated_cost = num_passengers * float(price) if price else 0.0
+        schedules = load_schedules()
+        trip_details = None
+        for s in schedules:
+            if s['bus_route_id'] == bus_route_id and s['time'] == time:
+                trip_details = s
+                break
+
+        if not trip_details:
+            print(f"SECURITY WARNING: Failed attempt to book non-existent trip. ID: {bus_route_id}, Time: {time}")
+            flash('The selected bus route is invalid. Please do not alter the URL.', 'danger')
+            return redirect(url_for('schedule'))
+
+        passenger_name = current_user.username
+        passenger_email = current_user.email
+        num_passengers = 1
+        price = float(trip_details.get('price', 0.0))
+        calculated_cost = num_passengers * price
 
         return render_template('book.html',
-                               bus_route_id=bus_route_id,
-                               source=source,
-                               destination=destination,
-                               operating_days=operating_days,
-                               time=time,
-                               price=float(price) if price else 0.0,
-                               duration=duration,
+                               bus_route_id=trip_details['bus_route_id'],
+                               source=trip_details['source'],
+                               destination=trip_details['destination'],
+                               operating_days=trip_details['operating_days'],
+                               time=trip_details['time'],
+                               price=price,
+                               duration=trip_details['duration'],
                                passenger_name=passenger_name,
                                passenger_email=passenger_email,
                                num_passengers=num_passengers,
                                total_cost=calculated_cost)
+
     else:
         name = request.form['name']
         email = request.form['email']
@@ -183,22 +191,78 @@ def book():
         duration = request.form['duration']
         num_passengers = request.form.get('num_passengers', 1, type=int)
 
-        final_total_cost = num_passengers * float(price) if price else 0.0
+        final_total_cost = num_passengers * float(price)
 
         session['booking_details'] = {
-            'name': name,
-            'email': email,
-            'bus_route_id': bus_route_id,
-            'source': source,
-            'destination': destination,
-            'operating_days': operating_days,
-            'time': time,
-            'price': price,
-            'duration': duration,
-            'num_passengers': num_passengers,
-            'total_cost': final_total_cost
+            'name': name, 'email': email, 'bus_route_id': bus_route_id,
+            'source': source, 'destination': destination, 'operating_days': operating_days,
+            'time': time, 'price': price, 'duration': duration,
+            'num_passengers': num_passengers, 'total_cost': final_total_cost
         }
         return redirect(url_for('process_payment'))
+
+# @app.route('/book', methods=['GET', 'POST'])
+# @login_required
+# def book():
+#     if request.method == 'GET':
+#         bus_route_id = request.args.get('bus_route_id')
+#         # source = request.args.get('source')
+#         # destination = request.args.get('destination')
+#         # operating_days = request.args.get('operating_days')
+#         time = request.args.get('time')
+#         # price = request.args.get('price')
+#         # duration = request.args.get('duration')
+#
+#         # passenger_name = current_user.username if current_user.is_authenticated else ''
+#         # passenger_email = current_user.email if current_user.is_authenticated else ''
+#         # num_passengers = 1
+#
+#         if not (bus_route_id or not time):
+#             flash('Please select a bus from the schedule to book your seat.', 'info')
+#             return render_template('book_direct.html')
+#
+#         # calculated_cost = num_passengers * float(price) if price else 0.0
+#
+#         return render_template('book.html',
+#                                bus_route_id=bus_route_id,
+#                                source=source,
+#                                destination=destination,
+#                                operating_days=operating_days,
+#                                time=time,
+#                                price=float(price) if price else 0.0,
+#                                duration=duration,
+#                                passenger_name=passenger_name,
+#                                passenger_email=passenger_email,
+#                                num_passengers=num_passengers,
+#                                total_cost=calculated_cost)
+#     else:
+#         name = request.form['name']
+#         email = request.form['email']
+#         bus_route_id = request.form['bus_route_id']
+#         source = request.form['source']
+#         destination = request.form['destination']
+#         operating_days = request.form['operating_days']
+#         time = request.form['time']
+#         price = request.form['price']
+#         duration = request.form['duration']
+#         num_passengers = request.form.get('num_passengers', 1, type=int)
+#
+#         final_total_cost = num_passengers * float(price) if price else 0.0
+#
+#         session['booking_details'] = {
+#             'name': name,
+#             'email': email,
+#             'bus_route_id': bus_route_id,
+#             'source': source,
+#             'destination': destination,
+#             'operating_days': operating_days,
+#             'time': time,
+#             'price': price,
+#             'duration': duration,
+#             'num_passengers': num_passengers,
+#             'total_cost': final_total_cost
+#         }
+#         return redirect(url_for('process_payment'))
 
 
 @app.route('/process_payment', methods=['GET', 'POST'])
@@ -272,17 +336,17 @@ def process_payment():
     return render_template('process_payment.html', booking_details=booking_details, now=datetime.datetime.now())
 
 
-@app.route('/confirmation')
-def confirmation():
-    name = request.args.get('name')
-    bus_route_id = request.args.get('bus_route_id')
-    source = request.args.get('source')
-    destination = request.args.get('destination')
-    operating_days = request.args.get('operating_days')
-    time = request.args.get('time')
-    price = request.args.get('price')
-    duration = request.args.get('duration')
-    return render_template('confirmation.html', name=name, bus_route_id=bus_route_id, source=source,destination=destination, operating_days=operating_days, time=time, price=price,duration=duration)
+# @app.route('/confirmation')
+# def confirmation():
+#     name = request.args.get('name')
+#     bus_route_id = request.args.get('bus_route_id')
+#     source = request.args.get('source')
+#     destination = request.args.get('destination')
+#     operating_days = request.args.get('operating_days')
+#     time = request.args.get('time')
+#     price = request.args.get('price')
+#     duration = request.args.get('duration')
+#     return render_template('confirmation.html', name=name, bus_route_id=bus_route_id, source=source,destination=destination, operating_days=operating_days, time=time, price=price,duration=duration)
 
 
 @app.route('/register', methods=['GET', 'POST'])
