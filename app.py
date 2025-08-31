@@ -1,3 +1,6 @@
+# -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
+# IMPORTS & BASIC SETUP
+# -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
 import csv
 import os
@@ -10,6 +13,9 @@ import json
 from flask_wtf.csrf import CSRFProtect
 from dotenv import load_dotenv
 
+# -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
+# APP CONFIG
+# -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 app = Flask(__name__)
 load_dotenv()
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
@@ -23,6 +29,7 @@ login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
 
+# loads schedule data from CSV on startup
 def load_schedules_from_csv():
     schedules = []
     csv_path = os.path.join(os.path.dirname(__file__), 'schedules_full.csv')
@@ -35,6 +42,9 @@ def load_schedules_from_csv():
 ALL_SCHEDULES = load_schedules_from_csv()
 
 
+# -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
+# DATABASE MODELS
+# -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(20), unique=True, nullable=False)
@@ -82,8 +92,9 @@ def load_user(user_id):
     return db.session.get(User, int(user_id))
 
 
-
-
+# -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
+# FLASK ROUTES
+# -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 @app.route('/')
 def home():
     stations = sorted(set([s['source'] for s in ALL_SCHEDULES] + [s['destination'] for s in ALL_SCHEDULES]))
@@ -97,23 +108,34 @@ def schedule():
     date_filter = request.args.get('date')
 
     stations = sorted(set([s['source'] for s in ALL_SCHEDULES] + [s['destination'] for s in ALL_SCHEDULES]))
+
+    search_date_obj = None
+    if date_filter:
+        try:
+            search_date_obj = datetime.datetime.strptime(date_filter, '%Y-%m-%d').date()
+        except ValueError:
+            flash(f"Invalid date provided: '{date_filter}'. Please check the format.", 'danger')
+            return render_template('schedule.html',
+                                   schedules=[],
+                                   source=source_filter,
+                                   destination=destination_filter,
+                                   date=date_filter,
+                                   stations=stations)
+
     filtered_schedules = []
 
     if source_filter or destination_filter or date_filter:
-        for s in ALL_SCHEDULES:  # <-- Use ALL_SCHEDULES
+        for s in ALL_SCHEDULES:
             match_source = (not source_filter or s['source'] == source_filter)
             match_destination = (not destination_filter or s['destination'] == destination_filter)
-
             match_operating_days_criteria = True
 
             if date_filter:
                 try:
-                    search_date = datetime.datetime.strptime(date_filter, '%Y-%m-%d').date()
-                    day_of_week = search_date.weekday()
-
+                    search_date_obj = datetime.datetime.strptime(date_filter, '%Y-%m-%d').date()
+                    day_of_week = search_date_obj.weekday()
                     is_weekday = day_of_week < 5
                     is_weekend = day_of_week >= 5
-
                     schedule_day_type = s['operating_days'].lower()
 
                     if schedule_day_type == 'everyday':
@@ -273,6 +295,9 @@ def process_payment():
     return render_template('process_payment.html', booking_details=booking_details, now=datetime.datetime.now())
 
 
+# -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
+# USER AUTHENTICATION ROUTES
+# -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
@@ -328,12 +353,16 @@ def logout():
     return redirect(url_for('home'))
 
 
+# -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
+# BOOKING MANAGEMENT ROUTES
+# -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 @app.route('/my_bookings')
 @login_required
 def my_bookings():
     user_id = current_user.id
     bookings = Booking.query.filter_by(user_id=user_id).order_by(Booking.id.desc()).all()
     return render_template('my_bookings.html', bookings=bookings)
+
 
 @app.route('/cancel_booking/<int:booking_id>', methods=['POST'])
 @login_required
@@ -351,6 +380,9 @@ def cancel_booking(booking_id):
     return redirect(url_for('my_bookings'))
 
 
+# -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
+# CHATBOT ROUTES
+# -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 @app.route('/chatbot_api', methods=['POST'])
 @login_required
 def chatbot_api():
@@ -366,6 +398,7 @@ def chatbot_api():
             {'role': 'model', 'parts': ['<p>Understood. I will provide all my responses using basic HTML formatting.</p>']}]
 
     try:
+        #1.detect user intent
         temp_chat_session_for_intent = model.start_chat(history=[])
         intent_prompt = f"""
         Classify the user's query into one of these categories: "schedule_query", "app_help", "cost_query", "general_conversation".
@@ -378,6 +411,7 @@ def chatbot_api():
         final_ai_response = ""
         actual_chat_session = model.start_chat(history=user_chat_history[user_id])
 
+        #2.handles response based on the intent
         if detected_intent == "app_help":
             if "cancel" in user_message.lower():
                 final_ai_response = "<p>To cancel a booking, please go to the <strong>'My Bookings'</strong> page from the navigation bar. You will see a 'Cancel' button next to each of your confirmed bookings.</p>"
@@ -395,6 +429,7 @@ def chatbot_api():
                 """
 
         elif detected_intent == "cost_query":
+            #extract cities and find prices
             extraction_prompt = f"""
             Extract 'source city' and 'destination city' from the user query. Return as a JSON object.
             Query: "{user_message}" -> {{"source": "...", "destination": "..."}}
@@ -418,6 +453,7 @@ def chatbot_api():
                 final_ai_response = "<p>Each bus ticket has a dynamic price. The total cost will be calculated and displayed on the booking page.</p>"
 
         elif detected_intent == "schedule_query":
+            #extract cities and searches for schedules
             extraction_prompt = f"""
             From the user query below, extract the 'source' city and 'destination' city.
             Return ONLY a valid JSON object in the format {{"source": "...", "destination": "..."}}.
@@ -456,7 +492,7 @@ def chatbot_api():
             except (json.JSONDecodeError, ValueError):
                 final_ai_response = "<p>I couldn't quite understand the route. Could you please state the departure and arrival cities clearly? For example: 'bus from London to Manchester'.</p>"
 
-        else:
+        else: #if general conversation
             if "speed" in user_message.lower() or "test" in user_message.lower():
                 final_ai_response = "<p>I am a bus booking assistant and cannot perform that kind of test. How can I help you with your travel plans?</p>"
             else:
@@ -464,6 +500,7 @@ def chatbot_api():
                     f"The user said: '{user_message}'. Provide a brief, friendly, and conversational response, remembering to use HTML tags.")
                 final_ai_response = response.text
 
+        #3. updates and save chat history
         user_chat_history[user_id].append({'role': 'user', 'parts': [user_message]})
         user_chat_history[user_id].append({'role': 'model', 'parts': [final_ai_response]})
         return jsonify({"response": final_ai_response})
@@ -472,11 +509,16 @@ def chatbot_api():
         print(f"Global Error calling Gemini API: {e}")
         return jsonify({"response": "<p>Sorry, I'm having trouble connecting. Please try again later.</p>"}), 500
 
+
 @app.route("/chatbot")
 @login_required
 def chatbot_page():
     return render_template('chatbot.html')
 
+
+# -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
+# RUN APP
+# -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
+
 if __name__ == '__main__':
     app.run(debug=False)
-
