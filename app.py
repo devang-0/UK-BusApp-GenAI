@@ -23,6 +23,17 @@ login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
 
+def load_schedules_from_csv():
+    schedules = []
+    csv_path = os.path.join(os.path.dirname(__file__), 'schedules_full.csv')
+    with open(csv_path, newline='', encoding='utf-8') as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            schedules.append(row)
+    return schedules
+
+ALL_SCHEDULES = load_schedules_from_csv()
+
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -71,35 +82,25 @@ def load_user(user_id):
     return db.session.get(User, int(user_id))
 
 
-def load_schedules():
-    schedules = []
-    csv_path = os.path.join(os.path.dirname(__file__), 'schedules_full.csv')
-    with open(csv_path, newline='', encoding='utf-8') as csvfile:
-        reader = csv.DictReader(csvfile)
-        for row in reader:
-            schedules.append(row)
-    return schedules
 
 
 @app.route('/')
 def home():
-    schedules = load_schedules()
-    stations = sorted(set([s['source'] for s in schedules] + [s['destination'] for s in schedules]))
+    stations = sorted(set([s['source'] for s in ALL_SCHEDULES] + [s['destination'] for s in ALL_SCHEDULES]))
     return render_template('home.html', stations=stations)
 
 
 @app.route('/schedule')
 def schedule():
-    schedules = load_schedules()
     source_filter = request.args.get('source')
     destination_filter = request.args.get('destination')
     date_filter = request.args.get('date')
 
-    stations = sorted(set([s['source'] for s in schedules] + [s['destination'] for s in schedules]))
+    stations = sorted(set([s['source'] for s in ALL_SCHEDULES] + [s['destination'] for s in ALL_SCHEDULES]))
     filtered_schedules = []
 
     if source_filter or destination_filter or date_filter:
-        for s in schedules:
+        for s in ALL_SCHEDULES:  # <-- Use ALL_SCHEDULES
             match_source = (not source_filter or s['source'] == source_filter)
             match_destination = (not destination_filter or s['destination'] == destination_filter)
 
@@ -148,9 +149,8 @@ def book():
             flash('Please select a bus from the schedule to book your seat.', 'info')
             return render_template('book_direct.html')
 
-        schedules = load_schedules()
         trip_details = None
-        for s in schedules:
+        for s in ALL_SCHEDULES:
             if s['bus_route_id'] == bus_route_id and s['time'] == time:
                 trip_details = s
                 break
@@ -200,69 +200,6 @@ def book():
             'num_passengers': num_passengers, 'total_cost': final_total_cost
         }
         return redirect(url_for('process_payment'))
-
-# @app.route('/book', methods=['GET', 'POST'])
-# @login_required
-# def book():
-#     if request.method == 'GET':
-#         bus_route_id = request.args.get('bus_route_id')
-#         # source = request.args.get('source')
-#         # destination = request.args.get('destination')
-#         # operating_days = request.args.get('operating_days')
-#         time = request.args.get('time')
-#         # price = request.args.get('price')
-#         # duration = request.args.get('duration')
-#
-#         # passenger_name = current_user.username if current_user.is_authenticated else ''
-#         # passenger_email = current_user.email if current_user.is_authenticated else ''
-#         # num_passengers = 1
-#
-#         if not (bus_route_id or not time):
-#             flash('Please select a bus from the schedule to book your seat.', 'info')
-#             return render_template('book_direct.html')
-#
-#         # calculated_cost = num_passengers * float(price) if price else 0.0
-#
-#         return render_template('book.html',
-#                                bus_route_id=bus_route_id,
-#                                source=source,
-#                                destination=destination,
-#                                operating_days=operating_days,
-#                                time=time,
-#                                price=float(price) if price else 0.0,
-#                                duration=duration,
-#                                passenger_name=passenger_name,
-#                                passenger_email=passenger_email,
-#                                num_passengers=num_passengers,
-#                                total_cost=calculated_cost)
-#     else:
-#         name = request.form['name']
-#         email = request.form['email']
-#         bus_route_id = request.form['bus_route_id']
-#         source = request.form['source']
-#         destination = request.form['destination']
-#         operating_days = request.form['operating_days']
-#         time = request.form['time']
-#         price = request.form['price']
-#         duration = request.form['duration']
-#         num_passengers = request.form.get('num_passengers', 1, type=int)
-#
-#         final_total_cost = num_passengers * float(price) if price else 0.0
-#
-#         session['booking_details'] = {
-#             'name': name,
-#             'email': email,
-#             'bus_route_id': bus_route_id,
-#             'source': source,
-#             'destination': destination,
-#             'operating_days': operating_days,
-#             'time': time,
-#             'price': price,
-#             'duration': duration,
-#             'num_passengers': num_passengers,
-#             'total_cost': final_total_cost
-#         }
-#         return redirect(url_for('process_payment'))
 
 
 @app.route('/process_payment', methods=['GET', 'POST'])
@@ -334,19 +271,6 @@ def process_payment():
         return redirect(url_for('my_bookings'))
 
     return render_template('process_payment.html', booking_details=booking_details, now=datetime.datetime.now())
-
-
-# @app.route('/confirmation')
-# def confirmation():
-#     name = request.args.get('name')
-#     bus_route_id = request.args.get('bus_route_id')
-#     source = request.args.get('source')
-#     destination = request.args.get('destination')
-#     operating_days = request.args.get('operating_days')
-#     time = request.args.get('time')
-#     price = request.args.get('price')
-#     duration = request.args.get('duration')
-#     return render_template('confirmation.html', name=name, bus_route_id=bus_route_id, source=source,destination=destination, operating_days=operating_days, time=time, price=price,duration=duration)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -458,7 +382,7 @@ def chatbot_api():
             if "cancel" in user_message.lower():
                 final_ai_response = "<p>To cancel a booking, please go to the <strong>'My Bookings'</strong> page from the navigation bar. You will see a 'Cancel' button next to each of your confirmed bookings.</p>"
             elif "register" in user_message.lower():
-                final_ai_response = "<p>To create a new account, click on the <strong>'Register'</strong> link in the navigation bar at the top of the page and fill out the form.</p>"
+                final_ai_response = "<p>To create an account, click on the <strong>'Register'</strong> link in the navigation bar at the top of the page and fill out the form.</p>"
             else:
                 final_ai_response = """
                 <p>Hello! I can help you with how to use UK BusApp.</p>
@@ -483,8 +407,7 @@ def chatbot_api():
                 source = extracted_params.get('source')
                 destination = extracted_params.get('destination')
 
-                all_schedules = load_schedules()
-                specific_schedule = next((s for s in all_schedules if source and destination and s['source'].lower() == source.lower() and s[ 'destination'].lower() == destination.lower()), None)
+                specific_schedule = next((s for s in ALL_SCHEDULES if source and destination and s['source'].lower() == source.lower() and s[ 'destination'].lower() == destination.lower()), None)
 
                 if specific_schedule:
                     price = specific_schedule['price']
@@ -516,9 +439,8 @@ def chatbot_api():
                 if not source_query and not destination_query:
                     final_ai_response = "<p>I can help you find a bus! Please tell me where you'd like to travel from and to (for example: 'bus from London to Manchester').</p>"
                 else:
-                    all_schedules = load_schedules()
                     found_schedules = []
-                    for s in all_schedules:
+                    for s in ALL_SCHEDULES:
                         match_source = (not source_query or (s['source'] and source_query.lower() in s['source'].lower()))
                         match_destination = (not destination_query or (s['destination'] and destination_query.lower() in s['destination'].lower()))
                         if match_source and match_destination:
@@ -556,5 +478,5 @@ def chatbot_page():
     return render_template('chatbot.html')
 
 if __name__ == '__main__':
-    app.run(debug=True)
-    #app.run(host='0.0.0.0', port=8080, debug=True) #To access the app from any device on the same network.
+    app.run(debug=False)
+
