@@ -1,5 +1,5 @@
 import pytest
-from app import app, db, User, Booking, load_schedules
+from app import app, db, User, Booking, ALL_SCHEDULES
 
 @pytest.fixture
 def client():
@@ -25,8 +25,12 @@ def test_password_hashing():
     assert u.check_password('wrongpassword') is False
 
 
+# CHANGE #2: The test now checks the ALL_SCHEDULES variable directly
 def test_load_schedules():
-    schedules = load_schedules()
+    """
+    Tests if the ALL_SCHEDULES global variable is loaded correctly.
+    """
+    schedules = ALL_SCHEDULES
     assert isinstance(schedules, list)
     assert len(schedules) > 0
     assert 'bus_route_id' in schedules[0]
