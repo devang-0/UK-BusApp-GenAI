@@ -1,26 +1,25 @@
-# UK BusApp – MSc Computer Science Project
+# UK BusApp – AI-Assisted Transit Search & Ticket Booking Platform
 
 ## 1. Project Overview
 
-**UK BusApp** is a functional web application developed for an MSc Computer Science project at the University of Birmingham. It provides a complete flow for searching UK bus schedules, user authentication, ticket booking with a simulated payment step, booking management (view/cancel), and an AI-powered assistant to help users with queries.
+**UK BusApp** is a full-stack Python web application engineered as an M.Sc. Computer Science project at the University of Birmingham. The platform provides users with a complete, secure ecosystem to search UK bus schedules, manage accounts, and book tickets via a simulated payment flow, alongside an integrated AI conversational assistant.
 
-The application demonstrates full-stack web development with Flask, persistent storage with SQLAlchemy/SQLite, session & CSRF security, automated testing, and integration of third-party AI services.
+The project demonstrates end-to-end software development—combining a scalable Flask backend, robust user authentication, relational database persistence, site-wide security, and third-party LLM orchestration.
 
 ### Core Features
-- **Dynamic Schedule Search:** Filter schedules by **source**, **destination**, and **date**.
-- **Secure Authentication:** Register, login, logout, and session management (Flask-Login).
-- **Booking System:** Select a trip → enter details → simulated payment → confirmation.
-- **User Dashboard:** View booking history and cancel upcoming trips.
-- **AI Chatbot Assistant:** Conversational help using **Google Generative AI (Gemini)**.
+- **Schedule Search & Booking Engine:** Multi-step transactional flow allowing users to filter live schedules by source, destination, and date, proceed through a simulated payment gate, and generate booking confirmations.
+- **AI Chatbot Assistant:** A conversational help interface powered by the Google Gemini API. It leverages custom context injection to parse natural language user queries and safely route them against local database rules.
+- **Secure Authentication & State:** Full user registration, login, and secure session state persistence handled via Flask-Login, featuring encrypted cryptographic password hashing.
+- **Site-Wide Security Operations:** Robust cross-site request forgery (CSRF) mitigation implemented across all application forms using Flask-WTF.
+- **Automated Regression Testing:** A clean validation suite built with Pytest to systematically test end-to-end user journeys, endpoint stability, and core transaction routes.
 
-### Technology Stack
-- **Frontend:** Jinja2 templates, Bootstrap 5
-- **Backend:** Python, Flask
-- **Database:** SQLite via Flask-SQLAlchemy
-- **Auth:** Flask-Login (password hashing; session cookies)
-- **Security:** CSRF protection with Flask-WTF
-- **AI Integration:** `google-generativeai` (Gemini)
-- **Testing:** Pytest
+### Technical Stack
+- **Backend Framework:** Python, Flask 
+- **Database Architecture:** SQLite via SQLAlchemy Object-Relational Mapping (ORM)
+- **AI Integration:** Google Generative AI SDK (`google-generativeai` / Gemini API)
+- **Security & Session Suite:** Flask-Login, Flask-WTF (CSRF Protection), Werkzeug Hashing
+- **Testing Engine:** Pytest Framework
+- **Frontend Presentation:** Jinja2 Templates, Bootstrap 5 UI
 
 ---
 
@@ -28,27 +27,27 @@ The application demonstrates full-stack web development with Flask, persistent s
 
 ```
 MSc Project/
-├─ app.py                      # Main Flask application
+├─ app.py                      # Main Flask application & orchestration logic
 ├─ requirements.txt            # Python dependencies
-├─ schedules_full.csv          # Local bus schedules data
-├─ templates/                  # Jinja2 templates (Bootstrap UI)
+├─ schedules_full.csv          # Structured relational source data
+├─ templates/                  # Jinja2 layout ecosystem
 │  ├─ base.html
-│  ├─ home.html                # Search form
-│  ├─ schedule.html            # Search results
+│  ├─ home.html                # Parameterized search vector input
+│  ├─ schedule.html            # Data rendering pipeline
 │  ├─ book.html
 │  ├─ book_direct.html
-│  ├─ process_payment.html     # Simulated payment
+│  ├─ process_payment.html     # Simulated transaction state
 │  ├─ confirmation.html
-│  ├─ my_bookings.html         # Booking history & cancel
+│  ├─ my_bookings.html         # User dashboard & cancellation logic
 │  ├─ login.html
 │  ├─ register.html
-│  └─ chatbot.html             # AI assistant UI
+│  └─ chatbot.html             # Real-time GenAI conversational interface
 ├─ tests/
-│  └─ test_app.py              # Minimal functional tests
-└─ .env                        # Environment variables 
+│  └─ test_app.py              # Functional endpoint & regression tests
+└─ .env                        # Isolated environment variables 
 ```
 
- **Note:** The SQLite database (`site.db`) is created automatically on first run.
+**Note:** The SQLite database (`site.db`) is initialized automatically on the application's first runtime execution.
 
 ---
 
@@ -61,13 +60,13 @@ These steps show how to run the application locally from a fresh clone using **C
 - [Miniconda](https://docs.conda.io/en/latest/miniconda.html) or [Anaconda](https://www.anaconda.com/products/distribution)
 
 ### Step 1: Clone the Repository
-```
-git clone <your-repository-url> (https://git.cs.bham.ac.uk/projects-2024-25/dxr419.git)
-cd "<repository-folder-name>"
+```bash
+git clone [https://github.com/devang-0/UK-BusApp-GenAI.git](https://github.com/devang-0/UK-BusApp-GenAI.git)
+cd "UK-BusApp-GenAI"
 ```
 
 ### Step 2: Create and Activate a Conda Environment
-```
+```bash
 # Create a clean environment (Python 3.9 is known-good for this project)
 conda create --name busapp_env python=3.9 -y
 
@@ -76,7 +75,7 @@ conda activate busapp_env
 ```
 
 ### Step 3: Install Dependencies
-```
+```bash
 pip install -r requirements.txt
 ```
 
@@ -91,10 +90,10 @@ SECRET_KEY="change_this_to_something_very_long"
 GOOGLE_API_KEY="your_google_generative_ai_api_key"
 ```
 
-- The core app (search, booking, etc.) runs without `GOOGLE_API_KEY`; however, the **chatbot** feature requires it.
+- The core app runs without `GOOGLE_API_KEY`; however, the **agentic chatbot** feature requires a valid key to communicate with the Gemini API.
 
 ### Step 5: Run the Application
-```
+```bash
 python app.py
 ```
 Open your browser at **http://127.0.0.1:5000**.
@@ -109,7 +108,7 @@ Open your browser at **http://127.0.0.1:5000**.
 4. **Book (`/book` or `/book_direct`)** – Provide passenger details and continue.  
 5. **Payment (`/process_payment`)** – Simulated payment; shows confirmation on success.  
 6. **My Bookings (`/my_bookings`)** – Browse upcoming/past bookings; cancel future ones.  
-7. **AI Assistant (`/chatbot`)** – Ask questions (e.g., “Birmingham to Leeds tomorrow at noon?”).  
+7. **AI Assistant (`/chatbot`)** – Ask complex questions (e.g., “Birmingham to Leeds tomorrow at noon?”).  
 
 **Tip:** Schedules are loaded from `schedules_full.csv` at startup; results are deterministic and offline.
 
@@ -144,37 +143,29 @@ Open your browser at **http://127.0.0.1:5000**.
 
 1. Ensure the **`busapp_env`** environment is active.
 2. From the project root, run:
-   ```
+   ```bash
    pytest
    ```
 
-A successful test run confirms core routes and flows are functioning.
+A successful test run confirms core routes and backend validation flows are functioning properly.
 
 ---
 
 ## 8. Common Issues & Fixes
 
-- **`ModuleNotFoundError` / missing packages**  
-  Activate the Conda env and reinstall deps:  
+- **`ModuleNotFoundError` / missing packages** Activate the Conda env and reinstall deps:  
   `conda activate busapp_env && pip install -r requirements.txt`
 
-- **CSRF errors on POST**  
-  Use the provided HTML forms/pages. For API calls, include the `X-CSRFToken` header.
+- **CSRF errors on POST** Use the provided HTML forms/pages. For API calls, include the `X-CSRFToken` header.
 
-- **Port 5000 already in use**  
-  Stop the other process or run via Flask CLI with a different port (e.g., `--port 5001`).
+- **Port 5000 already in use** Stop the other process or run via Flask CLI with a different port (e.g., `--port 5001`).
 
-- **Chatbot not responding**  
-  Verify `GOOGLE_API_KEY` is set correctly and the machine has internet access.
+- **Chatbot not responding** Verify `GOOGLE_API_KEY` is set correctly and the machine has internet access.
 
 ---
 
-## 9. Note
+## 9. Structural Safety Notes
 
-- Payment is **simulated**—no real transactions occur.  
-- Data is loaded from a local CSV, ensuring reproducibility.  
-- Passwords are hashed; sessions use `SECRET_KEY`; CSRF is enabled site-wide.  
-- Database is created on first run—no manual migrations needed.
-
----
-
+- Payment mechanics are entirely **simulated**—no real banking data is processed.  
+- Data loading is completely local, ensuring testing repeatability and high data-handling speeds.  
+- User passwords are securely salted and hashed; sessions utilize an isolated `SECRET_KEY`; token-based CSRF checks are enforced site-wide.
