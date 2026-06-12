@@ -72,7 +72,7 @@ cd "<repository-folder-name>"
 conda create --name busapp_env python=3.9 -y
 
 # Activate it
-conda activate busapp_env
+conda activate busapp_env 
 ```
 
 ### Step 3: Install Dependencies
